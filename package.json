@@ -1,0 +1,13 @@
+{
+  "name": "klodd",
+  "version": "0.0.1",
+  "description": "CTF challenge per-team instance runner",
+  "author": "TJCSC <tjhsstcsc@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "lerna": "^5.1.4"
+  },
+  "scripts": {
+    "start": "lerna run start"
+  }
+}

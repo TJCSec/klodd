@@ -1,0 +1,6 @@
+export const LABEL_CHALLENGE = 'klodd.tjcsec.club/challenge'
+export const LABEL_TEAM = 'klodd.tjcsec.club/team'
+export const LABEL_POD = 'klodd.tjcsec.club/pod'
+export const LABEL_INSTANCE = 'klodd.tjcsec.club/instance'
+export const LABEL_EGRESS = 'klodd.tjcsec.club/egress'
+export const LABEL_MANAGED_BY = 'app.kubernetes.io/managed-by'

@@ -1,0 +1,116 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: challenges.klodd.tjcsec.club
+spec:
+  group: klodd.tjcsec.club
+  names:
+    kind: Challenge
+    listKind: ChallengeList
+    plural: challenges
+    singular: challenge
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          description: >-
+            Challenge defines a per-team instanced challenge.
+          properties:
+            apiVersion:
+              description:
+                "APIVersion defines the versioned schema of this representation
+                of an object. Servers should convert recognized schemas to the latest
+                internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources"
+              type: string
+            kind:
+              description:
+                "Kind is a string value representing the REST resource this
+                object represents. Servers may infer this from the endpoint the client
+                submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: >-
+                    Name is the name displayed on the frontend.
+                timeout:
+                  type: integer
+                  description: >-
+                    Timeout is the time, in seconds, before each instance is automatically stopped.
+                pods:
+                  type: array
+                  description: >-
+                    Pods defines the pods that will run.
+                  minItems: 1
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: >-
+                          Name is a unique name for this pod. It is also the pod's hostname. Note that,
+                          because pods are created using Deployments, the actual pod name will differ
+                          from this value.
+                      ports:
+                        type: array
+                        description: >-
+                          Ports is an array of ports on this pod that will be accessible from other pods.
+                          This is used to create services. It must include the exposed port.
+                        items:
+                          type: object
+                          properties:
+                            port:
+                              type: integer
+                              description: >-
+                                Port is the port number. It must be a valid port number (1-65535, inclusive).
+                              minimum: 1
+                              maximum: 65535
+                            protocol:
+                              type: string
+                              enum: [TCP, UDP, SCTP]
+                              description: >-
+                                Protocol is the IP protocol for this port. Defaults to TCP.
+                          required:
+                            - port
+                      egress:
+                        type: boolean
+                        description: >-
+                          Egress controls whether or not this pod can access
+                          the internet. Defaults to false.
+                      spec:
+                        type: object
+                        description: >-
+                          Spec is the PodSpec that will be used to create the pod. Note that not all
+                          PodSpec properties can be configured.
+                        x-kubernetes-preserve-unknown-fields: true
+                    required: [name, spec]
+                expose:
+                  type: object
+                  description: >-
+                    Expose defines which pod competitors can access.
+                  properties:
+                    kind:
+                      type: string
+                      enum: [tcp, http]
+                    pod:
+                      type: string
+                      description: >-
+                        Pod is the name of the pod that will be exposed.
+                    port:
+                      type: integer
+                      minimum: 1
+                      maximum: 65535
+                      description: >-
+                        Port is the port that will be exposed. It must be a
+                        valid port number (1-65535, inclusive).
+                  required: [kind, pod, port]
+              required: [name, timeout, pods, expose]
+          required: [metadata, spec]
