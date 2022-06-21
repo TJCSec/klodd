@@ -1,13 +1,14 @@
 import challengeResources from '../../k8s/challenge/resource.js'
 import {
   getInstance,
-  startInstance,
-  stopInstance,
+  createInstance,
+  deleteInstance,
 } from '../../k8s/challenge/instance.js'
+import { InstanceCreationError } from '../../error.js'
 
 const routes = async (fastify, _options) => {
   fastify.addHook('preHandler', fastify.authenticate)
-  fastify.addHook('preHandler', (req, res) => {
+  fastify.addHook('preHandler', async (req, res) => {
     if (!challengeResources.has(req.params.challengeId)) {
       res.notFound('Challenge does not exist.')
     }
@@ -16,6 +17,35 @@ const routes = async (fastify, _options) => {
   fastify.route({
     method: 'GET',
     url: '/:challengeId',
+    schema: {
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            status: { type: 'string' },
+            time: {
+              type: 'object',
+              properties: {
+                start: { type: 'integer' },
+                timeout: { type: 'integer' },
+                remaining: { type: 'integer' },
+              },
+            },
+            server: {
+              type: 'object',
+              properties: {
+                kind: { type: 'string' },
+                host: { type: 'string' },
+                port: { type: 'integer' },
+              },
+              required: ['kind', 'host'],
+            },
+          },
+          required: ['name', 'status', 'time'],
+        },
+      },
+    },
     handler: async (req, _res) => {
       const { challengeId } = req.params
       const teamId = req.user.sub
@@ -25,32 +55,37 @@ const routes = async (fastify, _options) => {
 
   fastify.route({
     method: 'POST',
-    url: '/:challengeId/start',
-    handler: async (req, _res) => {
+    url: '/:challengeId',
+    handler: async (req, res) => {
       const { challengeId } = req.params
       const teamId = req.user.sub
       try {
-        await startInstance(challengeId, teamId)
-        return { success: true }
+        const instance = await createInstance(challengeId, teamId)
+        res.code(201)
+        return instance
       } catch (err) {
+        if (err instanceof InstanceCreationError) {
+          return res.conflict(err.message)
+        }
         fastify.log.error(err)
-        return { success: false }
+        return res.internalServerError('Unknown error creating instance.')
       }
     },
   })
 
   fastify.route({
-    method: 'POST',
-    url: '/:challengeId/stop',
-    handler: async (req, _res) => {
+    method: 'DELETE',
+    url: '/:challengeId',
+    handler: async (req, res) => {
       const { challengeId } = req.params
       const teamId = req.user.sub
       try {
-        await stopInstance(challengeId, teamId)
-        return { success: true }
+        await deleteInstance(challengeId, teamId)
+        res.code(204)
+        return undefined
       } catch (err) {
         fastify.log.error(err)
-        return { success: false }
+        return res.internalServerError('Unknown error deleting instance.')
       }
     },
   })

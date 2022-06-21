@@ -1,25 +1,43 @@
+import k8s from '@kubernetes/client-node'
+
 import config from '../../config.js'
+import { InstanceCreationError } from '../../error.js'
 import { appsV1Api, coreV1Api, customApi, networkingV1Api } from '../api.js'
-import { ANNOTATION_TTL, LABEL_INSTANCE, LABEL_POD } from '../const.js'
+import { LABEL_INSTANCE, LABEL_POD } from '../const.js'
 import { deleteNamespace, getNamespace, getPodsByLabel } from '../util.js'
-import challengeResources from './resource.js'
-import { remainingTime, scheduleDeletion } from './reaper.js'
 import {
-  getId,
   getHost,
+  getId,
   getNamespaceName,
   makeCommonLabels,
   makeDeploymentFactory,
+  makeIngressRoute,
+  makeIngressRouteTcp,
   makeNamespaceManifest,
   makeNetworkPolicies,
   makeServiceFactory,
-  makeIngressRoute,
-  makeIngressRouteTcp,
 } from './manifest.js'
+import { remainingTime, scheduleDeletion } from './reaper.js'
+import challengeResources from './resource.js'
+
+export const getServer = (challengeId, instanceId, kind) => {
+  const server = {
+    kind,
+    host: getHost(challengeId, instanceId),
+  }
+  if (kind === 'tcp') {
+    server.port = config.traefik.tcpPort
+  }
+  return server
+}
 
 export const getInstance = async (challengeId, teamId) => {
   const challengeConfig = challengeResources.get(challengeId)
-  const instance = {}
+  const instance = {
+    name: challengeConfig.name,
+    status: '',
+    time: { timeout: challengeConfig.timeout },
+  }
 
   const namespace = await getNamespace(getNamespaceName(challengeId, teamId))
   if (namespace === null) {
@@ -44,27 +62,20 @@ export const getInstance = async (challengeId, teamId) => {
   const status = pods[0].status.phase
   instance.status = status
   const creation = namespace.metadata.creationTimestamp.getTime()
-  const ttl = parseInt(namespace.metadata.annotations[ANNOTATION_TTL], 10)
-  instance.time = {
-    start: creation,
-    timeout: ttl,
-    remaining: remainingTime(creation, ttl),
-  }
+  const ttl = challengeConfig.timeout
+  instance.time.start = creation
+  instance.time.remaining = remainingTime(creation, ttl)
 
   if (status === 'Running' || status === 'Pending') {
     const instanceId = namespace.metadata.labels[LABEL_INSTANCE]
     const { kind } = challengeConfig.expose
-    const host = getHost(challengeId, instanceId)
-    instance.server = { kind, host }
-    if (kind === 'tcp') {
-      instance.server.port = config.traefik.tcpPort
-    }
+    instance.server = getServer(challengeId, instanceId, kind)
   }
 
   return instance
 }
 
-export const startInstance = async (challengeId, teamId) => {
+export const createInstance = async (challengeId, teamId) => {
   const challengeConfig = challengeResources.get(challengeId)
 
   const instanceId = getId()
@@ -76,7 +87,16 @@ export const startInstance = async (challengeId, teamId) => {
     timeout: challengeConfig.timeout,
   })
 
-  const { body: namespace } = await coreV1Api.createNamespace(namespaceManifest)
+  let apiResponse
+  try {
+    apiResponse = await coreV1Api.createNamespace(namespaceManifest)
+  } catch (err) {
+    if (err instanceof k8s.HttpError && err.statusCode === 409) {
+      throw new InstanceCreationError('Instance is already running.', err)
+    }
+    throw err
+  }
+  const namespace = apiResponse.body
   scheduleDeletion(namespace.metadata.name, challengeConfig.timeout)
 
   const networkPolicies = makeNetworkPolicies({
@@ -85,67 +105,90 @@ export const startInstance = async (challengeId, teamId) => {
     ingressSelector: config.ingress,
   })
 
-  await Promise.all(
-    networkPolicies.map((policy) =>
-      networkingV1Api.createNamespacedNetworkPolicy(
-        namespace.metadata.name,
-        policy
+  try {
+    await Promise.all(
+      networkPolicies.map((policy) =>
+        networkingV1Api.createNamespacedNetworkPolicy(
+          namespace.metadata.name,
+          policy
+        )
       )
     )
-  )
+  } catch (err) {
+    throw new InstanceCreationError('Could not create network policies.')
+  }
 
   const makeDeployment = makeDeploymentFactory(commonLabels)
 
-  await Promise.all(
-    challengeConfig.pods.map((pod) =>
-      appsV1Api.createNamespacedDeployment(
-        namespace.metadata.name,
-        makeDeployment(pod)
+  try {
+    await Promise.all(
+      challengeConfig.pods.map((pod) =>
+        appsV1Api.createNamespacedDeployment(
+          namespace.metadata.name,
+          makeDeployment(pod)
+        )
       )
     )
-  )
+  } catch (err) {
+    throw new InstanceCreationError('Could not create deployments.')
+  }
 
   const makeService = makeServiceFactory(commonLabels)
 
-  await Promise.all(
-    challengeConfig.pods.map((pod) =>
-      coreV1Api.createNamespacedService(
-        namespace.metadata.name,
-        makeService(pod)
+  try {
+    await Promise.all(
+      challengeConfig.pods.map((pod) =>
+        coreV1Api.createNamespacedService(
+          namespace.metadata.name,
+          makeService(pod)
+        )
       )
     )
-  )
+  } catch (err) {
+    throw new InstanceCreationError('Could not create services.')
+  }
 
-  if (challengeConfig.expose.kind === 'http') {
-    const ingressRoute = makeIngressRoute({
-      host: getHost(challengeId, instanceId),
-      entryPoint: config.traefik.httpEntrypoint,
-      serviceName: challengeConfig.expose.pod,
-      servicePort: challengeConfig.expose.port,
-    })
-    await customApi.createNamespacedCustomObject(
-      'traefik.containo.us',
-      'v1alpha1',
-      namespace.metadata.name,
-      'ingressroutes',
-      ingressRoute
-    )
-  } else {
-    // challengeConfig.expose.kind === 'tcp'
-    const ingressRouteTcp = makeIngressRouteTcp({
-      host: getHost(challengeId, instanceId),
-      entryPoint: config.traefik.tcpEntrypoint,
-      serviceName: challengeConfig.expose.pod,
-      servicePort: challengeConfig.expose.port,
-    })
-    await customApi.createNamespacedCustomObject(
-      'traefik.containo.us',
-      'v1alpha1',
-      namespace.metadata.name,
-      'ingressroutetcps',
-      ingressRouteTcp
-    )
+  try {
+    if (challengeConfig.expose.kind === 'http') {
+      const ingressRoute = makeIngressRoute({
+        host: getHost(challengeId, instanceId),
+        entryPoint: config.traefik.httpEntrypoint,
+        serviceName: challengeConfig.expose.pod,
+        servicePort: challengeConfig.expose.port,
+      })
+      await customApi.createNamespacedCustomObject(
+        'traefik.containo.us',
+        'v1alpha1',
+        namespace.metadata.name,
+        'ingressroutes',
+        ingressRoute
+      )
+    } else {
+      // challengeConfig.expose.kind === 'tcp'
+      const ingressRouteTcp = makeIngressRouteTcp({
+        host: getHost(challengeId, instanceId),
+        entryPoint: config.traefik.tcpEntrypoint,
+        serviceName: challengeConfig.expose.pod,
+        servicePort: challengeConfig.expose.port,
+      })
+      await customApi.createNamespacedCustomObject(
+        'traefik.containo.us',
+        'v1alpha1',
+        namespace.metadata.name,
+        'ingressroutetcps',
+        ingressRouteTcp
+      )
+    }
+  } catch (err) {
+    throw new InstanceCreationError('Could not create ingress.')
+  }
+
+  return {
+    name: challengeConfig.name,
+    time: { timeout: challengeConfig.timeout },
+    server: getServer(challengeId, instanceId, challengeConfig.expose.kind),
   }
 }
 
-export const stopInstance = async (challengeId, teamId) => deleteNamespace(getNamespaceName(challengeId, teamId))
+export const deleteInstance = async (challengeId, teamId) =>
+  deleteNamespace(getNamespaceName(challengeId, teamId))

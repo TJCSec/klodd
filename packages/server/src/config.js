@@ -11,7 +11,7 @@ const config = {
   traefik: {
     httpEntrypoint: 'websecure',
     tcpEntrypoint: 'tcp',
-    tcpPort: 31337,
+    tcpPort: 1337,
   },
   ingress: {
     namespaceSelector: {
