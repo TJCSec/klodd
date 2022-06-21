@@ -15,11 +15,13 @@
     "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.16"
+    "nodemon": "^2.0.16",
+    "prettier": "2.7.1"
   },
   "scripts": {
     "start": "node --unhandled-rejections=strict src/index.js",
-    "dev": "nodemon --unhandled-rejections=strict src/index.js"
+    "dev": "nodemon --unhandled-rejections=strict src/index.js",
+    "format": "yarn prettier --write ."
   },
   "type": "module"
 }

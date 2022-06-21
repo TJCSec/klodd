@@ -16,17 +16,30 @@ const deleteApiObj = (apiObj) => {
 
 const stopAll = async (challengeId) => {
   const label = `${LABEL_CHALLENGE}=${challengeId}`
-  const { body } = await coreV1Api.listNamespace(undefined, undefined, undefined, undefined, label)
-  return Promise.all(body.items.map(namespace => (
-    deleteNamespace(namespace.metadata.name)
-  )))
+  const { body } = await coreV1Api.listNamespace(
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    label
+  )
+  return Promise.all(
+    body.items.map((namespace) => deleteNamespace(namespace.metadata.name))
+  )
 }
 
 const subscribeToCluster = async () => {
-  const challengeList = (await customApi.listClusterCustomObject('klodd.tjcsec.club', 'v1', 'challenges')).body
+  const challengeList = (
+    await customApi.listClusterCustomObject(
+      'klodd.tjcsec.club',
+      'v1',
+      'challenges'
+    )
+  ).body
   await Promise.all(challengeList.items.map(saveApiObj))
 
-  return watch.watch('/apis/klodd.tjcsec.club/v1/challenges',
+  return watch.watch(
+    '/apis/klodd.tjcsec.club/v1/challenges',
     {
       resourceVersion: challengeList.metadata.resourceVersion,
     },

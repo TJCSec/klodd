@@ -1,11 +1,22 @@
 import crypto from 'crypto'
 
 import config from '../../config.js'
-import { ANNOTATION_TTL, LABEL_CHALLENGE, LABEL_EGRESS, LABEL_INSTANCE, LABEL_MANAGED_BY, LABEL_MANAGED_BY_VALUE, LABEL_POD, LABEL_TEAM } from '../const.js'
+import {
+  ANNOTATION_TTL,
+  LABEL_CHALLENGE,
+  LABEL_EGRESS,
+  LABEL_INSTANCE,
+  LABEL_MANAGED_BY,
+  LABEL_MANAGED_BY_VALUE,
+  LABEL_POD,
+  LABEL_TEAM,
+} from '../const.js'
 
 export const getId = () => crypto.randomBytes(8).toString('hex')
-export const getHost = (challengeId, instanceId) => `${challengeId}-${instanceId}.${config.challengeDomain}`
-export const getNamespaceName = (challengeId, teamId) => `klodd-${challengeId}-${teamId}`
+export const getHost = (challengeId, instanceId) =>
+  `${challengeId}-${instanceId}.${config.challengeDomain}`
+export const getNamespaceName = (challengeId, teamId) =>
+  `klodd-${challengeId}-${teamId}`
 
 export const makeCommonLabels = ({ challengeId, teamId, instanceId }) => ({
   [LABEL_CHALLENGE]: challengeId,
@@ -22,7 +33,11 @@ export const makeNamespaceManifest = ({ name, labels, timeout }) => ({
   },
 })
 
-export const makeNetworkPolicies = ({ commonLabels, exposedPod, ingressSelector }) => ([
+export const makeNetworkPolicies = ({
+  commonLabels,
+  exposedPod,
+  ingressSelector,
+}) => [
   {
     metadata: { name: 'isolate-network' },
     spec: {
@@ -47,7 +62,7 @@ export const makeNetworkPolicies = ({ commonLabels, exposedPod, ingressSelector 
           ],
         },
       ],
-    }
+    },
   },
   {
     metadata: { name: 'allow-ingress' },
@@ -80,59 +95,68 @@ export const makeNetworkPolicies = ({ commonLabels, exposedPod, ingressSelector 
       ],
     },
   },
-])
+]
 
-export const makeDeploymentFactory = (commonLabels) => ({ name, egress, spec }) => ({
-  metadata: {
-    name,
-    labels: {
-      [LABEL_POD]: name,
-      ...commonLabels,
-    },
-  },
-  spec: {
-    replicas: 1,
-    selector: {
-      matchLabels: {
+export const makeDeploymentFactory =
+  (commonLabels) =>
+  ({ name, egress, spec }) => ({
+    metadata: {
+      name,
+      labels: {
         [LABEL_POD]: name,
         ...commonLabels,
       },
     },
-    template: {
-      metadata: {
-        labels: {
+    spec: {
+      replicas: 1,
+      selector: {
+        matchLabels: {
           [LABEL_POD]: name,
-          [LABEL_EGRESS]: (egress ?? false).toString(),
           ...commonLabels,
         },
       },
-      spec
-    }
-  }
-})
-
-export const makeServiceFactory = (commonLabels) => ({ name, ports }) => ({
-  metadata: {
-    name,
-    labels: {
-      [LABEL_POD]: name,
-      ...commonLabels,
+      template: {
+        metadata: {
+          labels: {
+            [LABEL_POD]: name,
+            [LABEL_EGRESS]: (egress ?? false).toString(),
+            ...commonLabels,
+          },
+        },
+        spec,
+      },
     },
-  },
-  spec: {
-    selector: {
-      [LABEL_POD]: name,
-      ...commonLabels,
-    },
-    ports: ports.map(({ port, protocol }) => ({
-      name: `port-${port}`,
-      protocol: protocol ?? 'TCP',
-      port,
-    })),
-  },
-})
+  })
 
-export const makeIngressRoute = ({ host, entryPoint, serviceName, servicePort }) => ({
+export const makeServiceFactory =
+  (commonLabels) =>
+  ({ name, ports }) => ({
+    metadata: {
+      name,
+      labels: {
+        [LABEL_POD]: name,
+        ...commonLabels,
+      },
+    },
+    spec: {
+      selector: {
+        [LABEL_POD]: name,
+        ...commonLabels,
+      },
+      ports: ports.map(({ port, protocol }) => ({
+        name: `port-${port}`,
+        protocol: protocol ?? 'TCP',
+        port,
+      })),
+    },
+  })
+
+export const makeIngressRoute = ({
+  host,
+  entryPoint,
+  serviceName,
+  servicePort,
+}) => ({
   apiVersion: 'traefik.containo.us/v1alpha1',
   kind: 'IngressRoute',
   metadata: { name: 'ingress' },
@@ -147,15 +171,20 @@ export const makeIngressRoute = ({ host, entryPoint, serviceName, servicePort })
             kind: 'Service',
             name: serviceName,
             port: servicePort,
-          }
-        ]
-      }
+          },
+        ],
+      },
     ],
     tls: {},
   },
 })
 
-export const makeIngressRouteTcp = ({ host, entryPoint, serviceName, servicePort }) => ({
+export const makeIngressRouteTcp = ({
+  host,
+  entryPoint,
+  serviceName,
+  servicePort,
+}) => ({
   apiVersion: 'traefik.containo.us/v1alpha1',
   kind: 'IngressRouteTCP',
   metadata: { name: 'ingress' },
@@ -170,9 +199,9 @@ export const makeIngressRouteTcp = ({ host, entryPoint, serviceName, servicePort
             kind: 'Service',
             name: serviceName,
             port: servicePort,
-          }
-        ]
-      }
+          },
+        ],
+      },
     ],
     tls: {},
   },

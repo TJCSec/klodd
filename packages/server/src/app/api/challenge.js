@@ -1,5 +1,9 @@
 import challengeResources from '../../k8s/challenge/resource.js'
-import { getInstance, startInstance, stopInstance } from '../../k8s/challenge/instance.js'
+import {
+  getInstance,
+  startInstance,
+  stopInstance,
+} from '../../k8s/challenge/instance.js'
 
 const routes = async (fastify, _options) => {
   fastify.addHook('preHandler', fastify.authenticate)
@@ -16,7 +20,7 @@ const routes = async (fastify, _options) => {
       const challengeId = req.params.challengeId
       const teamId = req.user.sub
       return getInstance(challengeId, teamId)
-    }
+    },
   })
 
   fastify.route({
@@ -32,7 +36,7 @@ const routes = async (fastify, _options) => {
         fastify.log.error(err)
         return { success: false }
       }
-    }
+    },
   })
 
   fastify.route({
@@ -48,7 +52,7 @@ const routes = async (fastify, _options) => {
         fastify.log.error(err)
         return { success: false }
       }
-    }
+    },
   })
 }
 

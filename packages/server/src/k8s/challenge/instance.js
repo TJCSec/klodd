@@ -5,9 +5,16 @@ import { deleteNamespace, getNamespace, getPodsByLabel } from '../util.js'
 import challengeResources from './resource.js'
 import { remainingTime, scheduleDeletion } from './reaper.js'
 import {
-  getId, getHost, getNamespaceName,
-  makeCommonLabels, makeDeploymentFactory, makeNamespaceManifest,
-  makeNetworkPolicies, makeServiceFactory, makeIngressRoute, makeIngressRouteTcp,
+  getId,
+  getHost,
+  getNamespaceName,
+  makeCommonLabels,
+  makeDeploymentFactory,
+  makeNamespaceManifest,
+  makeNetworkPolicies,
+  makeServiceFactory,
+  makeIngressRoute,
+  makeIngressRouteTcp,
 } from './manifest.js'
 
 export const getInstance = async (challengeId, teamId) => {
@@ -25,7 +32,10 @@ export const getInstance = async (challengeId, teamId) => {
     return instance
   }
 
-  const pods = await getPodsByLabel(namespace.metadata.name, `${LABEL_POD}=${challengeConfig.expose.pod}`)
+  const pods = await getPodsByLabel(
+    namespace.metadata.name,
+    `${LABEL_POD}=${challengeConfig.expose.pod}`
+  )
   if (pods === undefined || pods.length === 0) {
     instance.status = 'Unknown'
     return instance
@@ -75,27 +85,36 @@ export const startInstance = async (challengeId, teamId) => {
     ingressSelector: config.ingress,
   })
 
-  await Promise.all(networkPolicies.map(policy => (
-    networkingV1Api.createNamespacedNetworkPolicy(
-      namespace.metadata.name, policy
+  await Promise.all(
+    networkPolicies.map((policy) =>
+      networkingV1Api.createNamespacedNetworkPolicy(
+        namespace.metadata.name,
+        policy
+      )
     )
-  )))
+  )
 
   const makeDeployment = makeDeploymentFactory(commonLabels)
 
-  await Promise.all(challengeConfig.pods.map((pod) => (
-    appsV1Api.createNamespacedDeployment(
-      namespace.metadata.name, makeDeployment(pod)
+  await Promise.all(
+    challengeConfig.pods.map((pod) =>
+      appsV1Api.createNamespacedDeployment(
+        namespace.metadata.name,
+        makeDeployment(pod)
+      )
     )
-  )))
+  )
 
   const makeService = makeServiceFactory(commonLabels)
 
-  await Promise.all(challengeConfig.pods.map((pod) => (
-    coreV1Api.createNamespacedService(
-      namespace.metadata.name, makeService(pod)
+  await Promise.all(
+    challengeConfig.pods.map((pod) =>
+      coreV1Api.createNamespacedService(
+        namespace.metadata.name,
+        makeService(pod)
+      )
     )
-  )))
+  )
 
   if (challengeConfig.expose.kind === 'http') {
     const ingressRoute = makeIngressRoute({
@@ -105,11 +124,14 @@ export const startInstance = async (challengeId, teamId) => {
       servicePort: challengeConfig.expose.port,
     })
     await customApi.createNamespacedCustomObject(
-      'traefik.containo.us', 'v1alpha1',
-      namespace.metadata.name, 'ingressroutes',
+      'traefik.containo.us',
+      'v1alpha1',
+      namespace.metadata.name,
+      'ingressroutes',
       ingressRoute
     )
-  } else { // challengeConfig.expose.kind === 'tcp'
+  } else {
+    // challengeConfig.expose.kind === 'tcp'
     const ingressRouteTcp = makeIngressRouteTcp({
       host: getHost(challengeId, instanceId),
       entryPoint: config.traefik.tcpEntrypoint,
@@ -117,8 +139,10 @@ export const startInstance = async (challengeId, teamId) => {
       servicePort: challengeConfig.expose.port,
     })
     await customApi.createNamespacedCustomObject(
-      'traefik.containo.us', 'v1alpha1',
-      namespace.metadata.name, 'ingressroutetcps',
+      'traefik.containo.us',
+      'v1alpha1',
+      namespace.metadata.name,
+      'ingressroutetcps',
       ingressRouteTcp
     )
   }
