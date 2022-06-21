@@ -22,7 +22,7 @@ export const getInstance = async (challengeId, teamId) => {
   const instance = {}
 
   const namespace = await getNamespace(getNamespaceName(challengeId, teamId))
-  if (namespace === undefined) {
+  if (namespace === null) {
     instance.status = 'Stopped'
     return instance
   }
@@ -36,7 +36,7 @@ export const getInstance = async (challengeId, teamId) => {
     namespace.metadata.name,
     `${LABEL_POD}=${challengeConfig.expose.pod}`
   )
-  if (pods === undefined || pods.length === 0) {
+  if (pods.length === 0) {
     instance.status = 'Unknown'
     return instance
   }
@@ -44,7 +44,7 @@ export const getInstance = async (challengeId, teamId) => {
   const status = pods[0].status.phase
   instance.status = status
   const creation = namespace.metadata.creationTimestamp.getTime()
-  const ttl = parseInt(namespace.metadata.annotations[ANNOTATION_TTL])
+  const ttl = parseInt(namespace.metadata.annotations[ANNOTATION_TTL], 10)
   instance.time = {
     start: creation,
     timeout: ttl,
@@ -53,7 +53,7 @@ export const getInstance = async (challengeId, teamId) => {
 
   if (status === 'Running' || status === 'Pending') {
     const instanceId = namespace.metadata.labels[LABEL_INSTANCE]
-    const kind = challengeConfig.expose.kind
+    const { kind } = challengeConfig.expose
     const host = getHost(challengeId, instanceId)
     instance.server = { kind, host }
     if (kind === 'tcp') {
@@ -148,6 +148,4 @@ export const startInstance = async (challengeId, teamId) => {
   }
 }
 
-export const stopInstance = async (challengeId, teamId) => {
-  return deleteNamespace(getNamespaceName(challengeId, teamId))
-}
+export const stopInstance = async (challengeId, teamId) => deleteNamespace(getNamespaceName(challengeId, teamId))

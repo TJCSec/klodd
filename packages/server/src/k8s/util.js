@@ -1,6 +1,5 @@
 import k8s from '@kubernetes/client-node'
 import { coreV1Api } from './api.js'
-import { clearDeletion } from './challenge/reaper.js'
 
 export const getPodsByLabel = async (namespace, podLabel) => {
   const { body } = await coreV1Api.listNamespacedPod(
@@ -31,7 +30,7 @@ export const getNamespace = async (namespace) => {
     return body
   } catch (err) {
     if (err instanceof k8s.HttpError && err.statusCode === 404) {
-      return
+      return null
     }
     throw err
   }
@@ -46,7 +45,5 @@ export const deleteNamespace = async (namespace) => {
       return false
     }
     throw err
-  } finally {
-    clearDeletion(namespace)
   }
 }

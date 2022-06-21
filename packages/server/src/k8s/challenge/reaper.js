@@ -7,6 +7,13 @@ import {
 
 const scheduledDeletions = new Map()
 
+export const clearDeletion = (namespace) => {
+  if (scheduledDeletions.has(namespace)) {
+    clearTimeout(scheduledDeletions.get(namespace))
+    scheduledDeletions.delete(namespace)
+  }
+}
+
 export const scheduleDeletion = (namespace, timeout, update = false) => {
   if (scheduledDeletions.has(namespace)) {
     if (update) {
@@ -24,13 +31,6 @@ export const scheduleDeletion = (namespace, timeout, update = false) => {
   )
 }
 
-export const clearDeletion = (namespace) => {
-  if (scheduledDeletions.has(namespace)) {
-    clearTimeout(scheduledDeletions.get(namespace))
-    scheduledDeletions.delete(namespace)
-  }
-}
-
 export const remainingTime = (creation, ttl) =>
   Math.max(0, creation + ttl - Date.now())
 
@@ -40,7 +40,7 @@ export const reaper = async () => {
   )
   namespaces.forEach((namespace) => {
     const creation = namespace.metadata.creationTimestamp.getTime()
-    const ttl = parseInt(namespace.metadata.annotations[ANNOTATION_TTL])
+    const ttl = parseInt(namespace.metadata.annotations[ANNOTATION_TTL], 10)
     scheduleDeletion(
       namespace.metadata.name,
       remainingTime(creation, ttl),

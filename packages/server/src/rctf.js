@@ -2,7 +2,7 @@ import got from 'got'
 
 import config from './config.js'
 
-export const getTeam = async (token) => {
+const getTeam = async (token) => {
   const { kind, data } = await got({
     prefixUrl: config.rctfUrl,
     url: 'api/v1/users/me',
@@ -14,7 +14,9 @@ export const getTeam = async (token) => {
     throwHttpErrors: false,
   })
   if (kind !== 'goodUserData') {
-    return
+    return null
   }
   return data
 }
+
+export default getTeam
