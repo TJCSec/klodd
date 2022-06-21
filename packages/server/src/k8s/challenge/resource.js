@@ -1,30 +1,44 @@
-import { customApi, watch } from '../api.js'
+import { coreV1Api, customApi, watch } from '../api.js'
+import { LABEL_CHALLENGE } from '../const.js'
+import { deleteNamespace } from '../util.js'
 
 const challengeResources = new Map()
 
 const saveApiObj = (apiObj) => {
-  const name = apiObj.metadata.name
-  challengeResources.set(name, apiObj.spec)
+  const challengeId = apiObj.metadata.name
+  challengeResources.set(challengeId, apiObj.spec)
 }
 
 const deleteApiObj = (apiObj) => {
-  const name = apiObj.metadata.name
-  challengeResources.delete(name)
+  const challengeId = apiObj.metadata.name
+  challengeResources.delete(challengeId)
+}
+
+const stopAll = async (challengeId) => {
+  const label = `${LABEL_CHALLENGE}=${challengeId}`
+  const { body } = await coreV1Api.listNamespace(undefined, undefined, undefined, undefined, label)
+  return Promise.all(body.items.map(namespace => (
+    deleteNamespace(namespace.metadata.name)
+  )))
 }
 
 const subscribeToCluster = async () => {
   const challengeList = (await customApi.listClusterCustomObject('klodd.tjcsec.club', 'v1', 'challenges')).body
-  challengeList.items.forEach(saveApiObj)
+  await Promise.all(challengeList.items.map(saveApiObj))
 
   return watch.watch('/apis/klodd.tjcsec.club/v1/challenges',
     {
       resourceVersion: challengeList.metadata.resourceVersion,
     },
-    (type, apiObj, _watchObj) => {
+    async (type, apiObj, _watchObj) => {
       if (type === 'ADDED' || type === 'MODIFIED') {
         saveApiObj(apiObj)
       } else if (type === 'DELETED') {
         deleteApiObj(apiObj)
+      }
+
+      if (type === 'MODIFIED' || type === 'DELETED') {
+        await stopAll(apiObj.metadata.name)
       }
     },
     (err) => {

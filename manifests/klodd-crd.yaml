@@ -30,7 +30,7 @@ spec:
                 timeout:
                   type: integer
                   description: >-
-                    Timeout is the time, in seconds, before each instance is automatically stopped.
+                    Timeout is the time, in milliseconds, before each instance is automatically stopped.
                 pods:
                   type: array
                   description: >-

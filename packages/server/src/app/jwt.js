@@ -12,7 +12,7 @@ const auth = fp(async (fastify, _options) => {
     try {
       await req.jwtVerify()
     } catch (err) {
-      res.send(err)
+      res.unauthorized('Invalid authorization token.')
     }
   })
 })

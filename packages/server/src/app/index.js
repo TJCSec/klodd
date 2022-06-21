@@ -2,7 +2,7 @@ import Fastify from 'fastify'
 import sensible from '@fastify/sensible'
 
 import api from './api/index.js'
-import rctfAuth from './rctf-auth.js'
+import jwt from './jwt.js'
 
 const fastify = Fastify({
   logger: true,
@@ -10,7 +10,7 @@ const fastify = Fastify({
 })
 
 fastify.register(sensible)
-fastify.register(rctfAuth)
+fastify.register(jwt)
 fastify.register(api, {
   prefix: '/api',
 })

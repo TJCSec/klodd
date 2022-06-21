@@ -4,15 +4,16 @@ CTF challenge per-team instance runner
 ## klodd is a work in progress, do not use
 
 ## high priority
-- [ ] timeout
+- [x] timeout
 - [ ] better config method (yaml file?)
-- [ ] delete all instances when resource is modified/deleted
+- [x] delete all instances when resource is modified/deleted
 - [ ] design better api (response types maybe)
 - [ ] frontend (use swr?)
 
 ## medium priority
 - [ ] docker
 - [ ] test in cluster (config.kubeConfig = 'cluster')
+- [ ] better logging
 - [ ] support middleware
 - [ ] undo spaghetti
 - [ ] babel, prettier, eslint maybe

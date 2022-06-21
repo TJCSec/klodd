@@ -2,8 +2,9 @@ import crypto from 'crypto'
 
 import config from '../../config.js'
 import { appsV1Api, coreV1Api, customApi, networkingV1Api } from '../api.js'
-import { LABEL_CHALLENGE, LABEL_EGRESS, LABEL_INSTANCE, LABEL_MANAGED_BY, LABEL_POD, LABEL_TEAM } from '../const.js'
-import { deleteNamespace, getNamespace, getPodByLabel } from '../util.js'
+import { ANNOTATION_TTL, LABEL_CHALLENGE, LABEL_EGRESS, LABEL_INSTANCE, LABEL_MANAGED_BY, LABEL_MANAGED_BY_VALUE, LABEL_POD, LABEL_TEAM } from '../const.js'
+import { deleteNamespace, getNamespace, getPodsByLabel } from '../util.js'
+import { remainingTime, scheduleDeletion } from './reaper.js'
 import challengeResources from './resource.js'
 
 const getId = () => crypto.randomBytes(8).toString('hex')
@@ -12,26 +13,36 @@ const getNamespaceName = (challengeId, teamId) => `klodd-${challengeId}-${teamId
 
 export const getInstance = async (challengeId, teamId) => {
   const challengeConfig = challengeResources.get(challengeId)
+  const instance = {}
 
   const namespace = await getNamespace(getNamespaceName(challengeId, teamId))
-  if (typeof namespace === 'undefined') {
-    return {
-      status: 'Stopped',
-    }
+  if (namespace === undefined) {
+    instance.status = 'Stopped'
+    return instance
   }
 
-  const pod = await getPodByLabel(namespace.metadata.name, `${LABEL_POD}=${challengeConfig.expose.pod}`)
-  if (typeof pod === 'undefined') {
-    return {
-      status: 'Stopped',
-    }
+  if (namespace.status.phase === 'Terminating') {
+    instance.status = 'Terminating'
+    return instance
   }
 
-  const instance = {
-    status: pod.status.phase,
+  const pods = await getPodsByLabel(namespace.metadata.name, `${LABEL_POD}=${challengeConfig.expose.pod}`)
+  if (pods === undefined || pods.length === 0) {
+    instance.status = 'Unknown'
+    return instance
   }
 
-  if (instance.status === 'Running') {
+  const status = pods[0].status.phase
+  instance.status = status
+  const creation = namespace.metadata.creationTimestamp.getTime()
+  const ttl = parseInt(namespace.metadata.annotations[ANNOTATION_TTL])
+  instance.time = {
+    start: creation,
+    timeout: ttl,
+    remaining: remainingTime(creation, ttl),
+  }
+
+  if (status === 'Running' || status === 'Pending') {
     const instanceId = namespace.metadata.labels[LABEL_INSTANCE]
     const kind = challengeConfig.expose.kind
     const host = getHost(challengeId, instanceId)
@@ -52,16 +63,18 @@ export const startInstance = async (challengeId, teamId) => {
     [LABEL_CHALLENGE]: challengeId,
     [LABEL_TEAM]: teamId,
     [LABEL_INSTANCE]: instanceId,
-    [LABEL_MANAGED_BY]: 'klodd',
+    [LABEL_MANAGED_BY]: LABEL_MANAGED_BY_VALUE,
   }
   const namespaceManifest = {
     metadata: {
       name: getNamespaceName(challengeId, teamId),
       labels: commonLabels,
+      annotations: { [ANNOTATION_TTL]: challengeConfig.timeout.toString() },
     },
   }
 
   const { body: namespace } = await coreV1Api.createNamespace(namespaceManifest)
+  scheduleDeletion(namespace.metadata.name, challengeConfig.timeout)
 
   const networkPolicies = [
     {

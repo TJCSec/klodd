@@ -25,6 +25,7 @@ const config = {
       },
     },
   },
+  reapInterval: 30000,
 }
 
 export default config

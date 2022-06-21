@@ -18,7 +18,7 @@ const routes = async (fastify, _options) => {
     handler: async (req, res) => {
       const { token } = req.body
       const team = await getTeam(token)
-      if (typeof team === 'undefined') {
+      if (team === undefined) {
         return res.unauthorized('Invalid rCTF token.')
       }
       const kloddToken = fastify.jwt.sign({ sub: team.id })
