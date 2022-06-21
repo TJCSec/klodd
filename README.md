@@ -8,6 +8,7 @@ CTF challenge per-team instance runner
 - [ ] better config method (yaml file?)
 - [x] delete all instances when resource is modified/deleted
 - [ ] design better api (response types maybe)
+- [ ] more descriptive errors (better than success: true/false)
 - [ ] frontend (use swr?)
 
 ## medium priority

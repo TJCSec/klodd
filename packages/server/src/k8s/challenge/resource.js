@@ -30,16 +30,13 @@ const subscribeToCluster = async () => {
     {
       resourceVersion: challengeList.metadata.resourceVersion,
     },
-    async (type, apiObj, _watchObj) => {
+    (type, apiObj, _watchObj) => {
       if (type === 'ADDED' || type === 'MODIFIED') {
         saveApiObj(apiObj)
       } else if (type === 'DELETED') {
         deleteApiObj(apiObj)
       }
-
-      if (type === 'MODIFIED' || type === 'DELETED') {
-        await stopAll(apiObj.metadata.name)
-      }
+      stopAll(apiObj.metadata.name)
     },
     (err) => {
       if (err) {
