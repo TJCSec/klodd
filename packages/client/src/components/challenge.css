@@ -1,0 +1,41 @@
+.challenge-status {
+  font-weight: bold;
+  color: black;
+}
+
+.challenge-status.pending {
+  color: var(--color-orange);
+}
+
+.challenge-status.running {
+  color: var(--color-green);
+}
+
+.challenge-status.failed {
+  color: var(--color-red);
+}
+
+.challenge-status.terminating {
+  color: var(--color-blue);
+}
+
+.challenge-button {
+  padding: 0.5em 1em;
+  font-size: large;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.challenge-button.stop {
+  background-color: var(--color-red);
+}
+
+.challenge-button.start {
+  background-color: var(--color-green);
+}
+
+.challenge-button.auth {
+  background-color: var(--color-blue);
+}

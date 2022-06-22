@@ -2,6 +2,7 @@ const config = {
   challengeDomain: 'tjc.tf',
   kubeConfig: 'default',
   port: 5000,
+  publicUrl: 'http://localhost:3000',
   rctfUrl: 'https://ctf.tjctf.org',
   recaptcha: {
     siteKey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',

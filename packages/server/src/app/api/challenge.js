@@ -7,12 +7,12 @@ import {
 import { InstanceCreationError } from '../../error.js'
 
 const routes = async (fastify, _options) => {
-  fastify.addHook('preHandler', fastify.authenticate)
   fastify.addHook('preHandler', async (req, res) => {
     if (!challengeResources.has(req.params.challengeId)) {
       res.notFound('Challenge does not exist.')
     }
   })
+  fastify.addHook('preHandler', fastify.authenticate)
 
   fastify.route({
     method: 'GET',
@@ -24,14 +24,7 @@ const routes = async (fastify, _options) => {
           properties: {
             name: { type: 'string' },
             status: { type: 'string' },
-            time: {
-              type: 'object',
-              properties: {
-                start: { type: 'integer' },
-                timeout: { type: 'integer' },
-                remaining: { type: 'integer' },
-              },
-            },
+            timeout: { type: 'integer' },
             server: {
               type: 'object',
               properties: {
@@ -41,8 +34,17 @@ const routes = async (fastify, _options) => {
               },
               required: ['kind', 'host'],
             },
+            time: {
+              type: 'object',
+              properties: {
+                start: { type: 'integer' },
+                stop: { type: 'integer' },
+                remaining: { type: 'integer' },
+              },
+              required: ['start', 'stop', 'remaining'],
+            },
           },
-          required: ['name', 'status', 'time'],
+          required: ['name', 'status', 'timeout'],
         },
       },
     },

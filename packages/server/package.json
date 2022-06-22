@@ -23,10 +23,9 @@
     "prettier": "2.7.1"
   },
   "scripts": {
-    "start": "node --unhandled-rejections=strict src/index.js",
-    "dev": "nodemon --unhandled-rejections=strict src/index.js",
+    "start": "nodemon --unhandled-rejections=strict src/index.js",
     "format": "yarn prettier --write .",
-    "lint": "yarn eslint ."
+    "lint": "yarn eslint --fix ."
   },
   "type": "module"
 }

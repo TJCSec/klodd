@@ -36,7 +36,7 @@ export const getInstance = async (challengeId, teamId) => {
   const instance = {
     name: challengeConfig.name,
     status: '',
-    time: { timeout: challengeConfig.timeout },
+    timeout: challengeConfig.timeout,
   }
 
   const namespace = await getNamespace(getNamespaceName(challengeId, teamId))
@@ -61,15 +61,20 @@ export const getInstance = async (challengeId, teamId) => {
 
   const status = pods[0].status.phase
   instance.status = status
-  const creation = namespace.metadata.creationTimestamp.getTime()
-  const ttl = challengeConfig.timeout
-  instance.time.start = creation
-  instance.time.remaining = remainingTime(creation, ttl)
 
   if (status === 'Running' || status === 'Pending') {
     const instanceId = namespace.metadata.labels[LABEL_INSTANCE]
     const { kind } = challengeConfig.expose
     instance.server = getServer(challengeId, instanceId, kind)
+
+    const creation = namespace.metadata.creationTimestamp.getTime()
+    const ttl = challengeConfig.timeout
+    const time = {
+      start: creation,
+      stop: creation + ttl,
+      remaining: remainingTime(creation, ttl),
+    }
+    instance.time = time
   }
 
   return instance
@@ -185,7 +190,8 @@ export const createInstance = async (challengeId, teamId) => {
 
   return {
     name: challengeConfig.name,
-    time: { timeout: challengeConfig.timeout },
+    status: 'Pending',
+    timeout: challengeConfig.timeout,
     server: getServer(challengeId, instanceId, challengeConfig.expose.kind),
   }
 }
