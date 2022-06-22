@@ -4,7 +4,7 @@ import { toast } from 'react-toastify'
 import useSWR from 'swr'
 import produce from 'immer'
 
-import MoonLoader from "react-spinners/MoonLoader"
+import MoonLoader from 'react-spinners/MoonLoader'
 import TimeAgo from 'react-timeago'
 
 import config from '../config'
@@ -12,8 +12,10 @@ import config from '../config'
 import Server from './server'
 import './challenge.css'
 
-const getState = () => Array.from(crypto.getRandomValues(new Uint8Array(16)))
-  .map(v => v.toString(16).padStart(2, '0')).join('')
+const getState = () =>
+  Array.from(crypto.getRandomValues(new Uint8Array(16)))
+    .map((v) => v.toString(16).padStart(2, '0'))
+    .join('')
 
 const timeFmt = (value, unit, suffix) => {
   if (suffix === 'from now') {
@@ -27,7 +29,7 @@ const apiRequest = async (challengeId, method = 'GET') => {
   const res = await fetch(`/api/challenge/${challengeId}`, {
     method,
     headers: {
-      authorization: `Bearer ${localStorage.getItem('token') ?? ''}`
+      authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
     },
   })
 
@@ -46,43 +48,44 @@ const apiRequest = async (challengeId, method = 'GET') => {
   }
 }
 
-const useChallenge = (challengeId) => useSWR(challengeId, apiRequest, {
-  // https://github.com/vercel/swr/blob/790e044d9d7d58194c2493a24073f23272af99c2/_internal/utils/config.ts#L16-L38
-  onErrorRetry: (error, _key, config, revalidate, opts) => {
-    if (error.status === 401 || error.status === 404) {
-      return
-    }
+const useChallenge = (challengeId) =>
+  useSWR(challengeId, apiRequest, {
+    // https://github.com/vercel/swr/blob/790e044d9d7d58194c2493a24073f23272af99c2/_internal/utils/config.ts#L16-L38
+    onErrorRetry: (error, _key, config, revalidate, opts) => {
+      if (error.status === 401 || error.status === 404) {
+        return
+      }
 
-    const maxRetryCount = config.errorRetryCount
-    const currentRetryCount = opts.retryCount
+      const maxRetryCount = config.errorRetryCount
+      const currentRetryCount = opts.retryCount
 
-    const timeout =
-      ~~(
-        (Math.random() + 0.5) *
-        (1 << (currentRetryCount < 8 ? currentRetryCount : 8))
-      ) * config.errorRetryInterval
+      const timeout =
+        ~~(
+          (Math.random() + 0.5) *
+          (1 << (currentRetryCount < 8 ? currentRetryCount : 8))
+        ) * config.errorRetryInterval
 
-    if (maxRetryCount !== undefined && currentRetryCount > maxRetryCount) {
-      return
-    }
+      if (maxRetryCount !== undefined && currentRetryCount > maxRetryCount) {
+        return
+      }
 
-    setTimeout(revalidate, timeout, opts)
-  },
-  refreshInterval: (data) => {
-    if (data === undefined) {
-      return 0
-    }
-    if (data.status === 'Pending') {
-      return 1000
-    } else if (data.status === 'Terminating' ) {
-      return 2000
-    } else if (data.status === 'Running') {
-      return (data.time.remaining < 5000) ? 1000 : 5000
-    } else {
-      return 0
-    }
-  }
-})
+      setTimeout(revalidate, timeout, opts)
+    },
+    refreshInterval: (data) => {
+      if (data === undefined) {
+        return 0
+      }
+      if (data.status === 'Pending') {
+        return 1000
+      } else if (data.status === 'Terminating') {
+        return 2000
+      } else if (data.status === 'Running') {
+        return data.time.remaining < 5000 ? 1000 : 5000
+      } else {
+        return 0
+      }
+    },
+  })
 
 const Challenge = () => {
   const { challengeId } = useParams()
@@ -94,8 +97,10 @@ const Challenge = () => {
     const width = 600
     const height = 500
     const systemZoom = window.innerWidth / window.screen.availWidth
-    const left = (window.innerWidth - width) / 2 / systemZoom + window.screenLeft
-    const top = (window.innerHeight - height) / 2 / systemZoom + window.screenTop
+    const left =
+      (window.innerWidth - width) / 2 / systemZoom + window.screenLeft
+    const top =
+      (window.innerHeight - height) / 2 / systemZoom + window.screenTop
 
     const state = getState()
     setAuthState(state)
@@ -104,12 +109,16 @@ const Challenge = () => {
     const redirect = new URL('/auth', config.publicUrl)
     url.searchParams.append('redirect_uri', redirect)
     url.searchParams.append('state', state)
-    const popup = window.open(url, 'Authenticate', [
-      `width=${width / systemZoom}`,
-      `height=${height / systemZoom}`,
-      `top=${top}`,
-      `left=${left}`,
-    ].join(','))
+    const popup = window.open(
+      url,
+      'Authenticate',
+      [
+        `width=${width / systemZoom}`,
+        `height=${height / systemZoom}`,
+        `top=${top}`,
+        `left=${left}`,
+      ].join(',')
+    )
     popup.focus()
   }
 
@@ -133,10 +142,10 @@ const Challenge = () => {
     const res = await fetch('/api/auth', {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ token: evt.data.token })
+      body: JSON.stringify({ token: evt.data.token }),
     })
 
     if (!res.ok) {
@@ -153,7 +162,9 @@ const Challenge = () => {
 
   useEffect(() => {
     window.addEventListener('message', handlePostMessage)
-    return () => { window.removeEventListener('message', handlePostMessage) }
+    return () => {
+      window.removeEventListener('message', handlePostMessage)
+    }
   })
 
   const handleStart = () => {
@@ -172,7 +183,7 @@ const Challenge = () => {
         error: {
           render({ data }) {
             return data.message
-          }
+          },
         },
       }
     )
@@ -196,8 +207,8 @@ const Challenge = () => {
         error: {
           render({ data }) {
             return data.message
-          }
-        }
+          },
+        },
       }
     )
   }
@@ -209,7 +220,9 @@ const Challenge = () => {
           <>
             <h1>Unauthenticated</h1>
             <p>You are currently unauthenticated.</p>
-            <button className="challenge-button auth" onClick={handleAuth}>Authenticate</button>
+            <button className="challenge-button auth" onClick={handleAuth}>
+              Authenticate
+            </button>
           </>
         )
       }
@@ -231,22 +244,39 @@ const Challenge = () => {
   return (
     <>
       <h1>{data.name}</h1>
-      <p>Status: <span className={`challenge-status ${data.status.toLowerCase()}`}>{data.status}</span></p>
-      {data.server &&
-        <p>Server: <Server {...data.server} /></p>
-      }
-      {data.time &&
-        <p>Stopping <TimeAgo date={data.time.stop} formatter={timeFmt} /></p>
-      }
-      {data.status === 'Stopped' &&
-        <button className="challenge-button start" onClick={handleStart}>Start</button>
-      }
-      {data.status === 'Running' &&
-        <button className="challenge-button stop" onClick={handleStop}>Stop</button>
-      }
-      {(data.status === 'Pending' || data.status === 'Terminating') &&
-        <MoonLoader css="position: absolute; top: 1rem; right: 1rem;" size={20} color="black" />
-      }
+      <p>
+        Status:{' '}
+        <span className={`challenge-status ${data.status.toLowerCase()}`}>
+          {data.status}
+        </span>
+      </p>
+      {data.server && (
+        <p>
+          Server: <Server {...data.server} />
+        </p>
+      )}
+      {data.time && (
+        <p>
+          Stopping <TimeAgo date={data.time.stop} formatter={timeFmt} />
+        </p>
+      )}
+      {data.status === 'Stopped' && (
+        <button className="challenge-button start" onClick={handleStart}>
+          Start
+        </button>
+      )}
+      {data.status === 'Running' && (
+        <button className="challenge-button stop" onClick={handleStop}>
+          Stop
+        </button>
+      )}
+      {(data.status === 'Pending' || data.status === 'Terminating') && (
+        <MoonLoader
+          css="position: absolute; top: 1rem; right: 1rem;"
+          size={20}
+          color="black"
+        />
+      )}
     </>
   )
 }

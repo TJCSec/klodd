@@ -1,4 +1,6 @@
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -8,7 +10,7 @@ body {
 }
 
 code {
-  font-family: 'Courier New', Courier, monospace
+  font-family: 'Courier New', Courier, monospace;
 }
 
 h1 {

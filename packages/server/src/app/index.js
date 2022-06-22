@@ -16,11 +16,13 @@ fastify.register(api, {
   prefix: '/api',
 })
 
-const clientConfig = 'window.config = ' + JSON.stringify({
-  publicUrl: config.publicUrl,
-  recaptcha: config.recaptcha.siteKey,
-  rctfUrl: config.rctfUrl,
-})
+const clientConfig =
+  'window.config = ' +
+  JSON.stringify({
+    publicUrl: config.publicUrl,
+    recaptcha: config.recaptcha.siteKey,
+    rctfUrl: config.rctfUrl,
+  })
 
 fastify.route({
   method: 'GET',
@@ -28,7 +30,7 @@ fastify.route({
   handler: (_req, res) => {
     res.type('text/javascript')
     return clientConfig
-  }
+  },
 })
 
 export default fastify
