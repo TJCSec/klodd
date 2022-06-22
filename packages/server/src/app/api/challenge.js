@@ -67,6 +67,7 @@ const routes = async (fastify, _options) => {
         return instance
       } catch (err) {
         if (err instanceof InstanceCreationError) {
+          await deleteInstance(challengeId, teamId)
           return res.conflict(err.message)
         }
         fastify.log.error(err)

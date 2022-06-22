@@ -4,6 +4,9 @@ import { toast } from 'react-toastify'
 import useSWR from 'swr'
 import produce from 'immer'
 
+import MoonLoader from "react-spinners/MoonLoader"
+import TimeAgo from 'react-timeago'
+
 import config from '../config'
 
 import Server from './server'
@@ -12,7 +15,13 @@ import './challenge.css'
 const getState = () => Array.from(crypto.getRandomValues(new Uint8Array(16)))
   .map(v => v.toString(16).padStart(2, '0')).join('')
 
-const timeFmt = Intl.DateTimeFormat([], { dateStyle: 'medium', timeStyle: 'long' })
+const timeFmt = (value, unit, suffix) => {
+  if (suffix === 'from now') {
+    return `in ${value} ${unit}${value > 1 ? 's' : ''}`
+  } else {
+    return 'now'
+  }
+}
 
 const apiRequest = async (challengeId, method = 'GET') => {
   const res = await fetch(`/api/challenge/${challengeId}`, {
@@ -66,9 +75,9 @@ const useChallenge = (challengeId) => useSWR(challengeId, apiRequest, {
     if (data.status === 'Pending') {
       return 1000
     } else if (data.status === 'Terminating' ) {
-      return 2500
+      return 2000
     } else if (data.status === 'Running') {
-      return 5000
+      return (data.time.remaining < 5000) ? 1000 : 5000
     } else {
       return 0
     }
@@ -115,7 +124,7 @@ const Challenge = () => {
     }
 
     if (authState === null || evt.data.state !== authState) {
-      toast.error('Invalid authentication state.')
+      toast.error('Invalid authentication state')
       return
     }
 
@@ -138,7 +147,7 @@ const Challenge = () => {
 
     const { token } = await res.json()
     localStorage.setItem('token', token)
-    toast.success('Authenticated.')
+    toast.success('Authenticated')
     mutate()
   }
 
@@ -147,25 +156,31 @@ const Challenge = () => {
     return () => { window.removeEventListener('message', handlePostMessage) }
   })
 
-  const handleStart = async () => {
-    try {
-      await mutate(apiRequest(challengeId, 'POST'), {
+  const handleStart = () => {
+    toast.promise(
+      mutate(apiRequest(challengeId, 'POST'), {
         optimisticData: produce(data, (draft) => {
           draft.status = 'Pending'
         }),
         rollbackOnError: true,
         revalidate: false,
         populateCache: true,
-      })
-      toast.success('Instance started.')
-    } catch (err) {
-      toast.error(err.message)
-    }
+      }),
+      {
+        pending: 'Starting instance',
+        success: 'Instance started',
+        error: {
+          render({ data }) {
+            return data.message
+          }
+        },
+      }
+    )
   }
 
-  const handleStop = async () => {
-    try {
-      await mutate(apiRequest(challengeId, 'DELETE'), {
+  const handleStop = () => {
+    toast.promise(
+      mutate(apiRequest(challengeId, 'DELETE'), {
         optimisticData: produce(data, (draft) => {
           draft.status = 'Terminating'
           delete draft.server
@@ -174,32 +189,38 @@ const Challenge = () => {
         rollbackOnError: true,
         revalidate: true,
         populateCache: false,
-      })
-      toast.success('Instance stopped.')
-    } catch (err) {
-      toast.error(err.message)
-    }
-  }
-
-  if (error) {
-    if (error.status === 401) {
-      return (
-        <>
-          <h1>Unauthenticated</h1>
-          <p>You are currently unauthenticated.</p>
-          <button className="challenge-button auth" onClick={handleAuth}>Authenticate</button>
-        </>
-      )
-    }
-    return (
-      <>
-        <h1>{error.info.error}</h1>
-        <p>{error.info.message}</p>
-      </>
+      }),
+      {
+        pending: 'Stopping instance',
+        success: 'Instance stopped',
+        error: {
+          render({ data }) {
+            return data.message
+          }
+        }
+      }
     )
   }
 
   if (!data) {
+    if (error) {
+      if (error.status === 401) {
+        return (
+          <>
+            <h1>Unauthenticated</h1>
+            <p>You are currently unauthenticated.</p>
+            <button className="challenge-button auth" onClick={handleAuth}>Authenticate</button>
+          </>
+        )
+      }
+      return (
+        <>
+          <h1>{error.info.error}</h1>
+          <p>{error.info.message}</p>
+        </>
+      )
+    }
+
     return (
       <>
         <p>Loading...</p>
@@ -215,16 +236,16 @@ const Challenge = () => {
         <p>Server: <Server {...data.server} /></p>
       }
       {data.time &&
-        <>
-          <p>Start: {timeFmt.format(data.time.start)}</p>
-          <p>Stop: {timeFmt.format(data.time.stop)}</p>
-        </>
+        <p>Stopping <TimeAgo date={data.time.stop} formatter={timeFmt} /></p>
       }
       {data.status === 'Stopped' &&
         <button className="challenge-button start" onClick={handleStart}>Start</button>
       }
       {data.status === 'Running' &&
         <button className="challenge-button stop" onClick={handleStop}>Stop</button>
+      }
+      {(data.status === 'Pending' || data.status === 'Terminating') &&
+        <MoonLoader css="position: absolute; top: 1rem; right: 1rem;" size={20} color="black" />
       }
     </>
   )
