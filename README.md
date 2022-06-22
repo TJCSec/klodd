@@ -20,6 +20,7 @@ CTF challenge per-team instance runner
 - [ ] undo spaghetti
 - [ ] babel, ~~prettier, eslint~~ maybe
 - [ ] testing lmao (jest probably)
+- [ ] handle not ready status
 
 ## low priority
 - [ ] typescript?

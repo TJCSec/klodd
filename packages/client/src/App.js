@@ -3,9 +3,9 @@ import { Routes, Route } from 'react-router-dom'
 
 import './App.css'
 
-import Auth from './components/auth'
-import Challenge from './components/challenge'
-import NotFound from './components/notfound'
+import Auth from './pages/auth'
+import Challenge from './pages/challenge'
+import NotFound from './pages/notfound'
 
 const App = () => (
   <div className="app">

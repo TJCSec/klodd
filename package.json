@@ -8,6 +8,8 @@
     "lerna": "^5.1.4"
   },
   "scripts": {
-    "start": "lerna run start --stream"
+    "start": "lerna run start --stream",
+    "format": "lerna run format",
+    "lint": "lerna run lint"
   }
 }

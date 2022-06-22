@@ -1,25 +1,31 @@
-.challenge-status {
+.status-text {
   font-weight: bold;
   color: black;
 }
 
-.challenge-status.pending {
+.status-spinner {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.status-pending {
   color: var(--color-orange);
 }
 
-.challenge-status.running {
+.status-running {
   color: var(--color-green);
 }
 
-.challenge-status.failed {
+.status-failed {
   color: var(--color-red);
 }
 
-.challenge-status.terminating {
+.status-terminating {
   color: var(--color-blue);
 }
 
-.challenge-button {
+.btn {
   padding: 0.5em 1em;
   font-size: large;
   border-radius: 3px;
@@ -28,14 +34,14 @@
   color: white;
 }
 
-.challenge-button.stop {
+.btn-stop {
   background-color: var(--color-red);
 }
 
-.challenge-button.start {
+.btn-start {
   background-color: var(--color-green);
 }
 
-.challenge-button.auth {
+.btn-auth {
   background-color: var(--color-blue);
 }
