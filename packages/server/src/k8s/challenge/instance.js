@@ -3,8 +3,8 @@ import k8s from '@kubernetes/client-node'
 import config from '../../config.js'
 import { InstanceCreationError } from '../../error.js'
 import { appsV1Api, coreV1Api, customApi, networkingV1Api } from '../api.js'
-import { LABEL_INSTANCE, LABEL_POD } from '../const.js'
-import { deleteNamespace, getNamespace, getPodsByLabel } from '../util.js'
+import { LABEL_INSTANCE } from '../const.js'
+import { deleteNamespace, getDeployment, getNamespace } from '../util.js'
 import {
   getHost,
   getId,
@@ -50,32 +50,31 @@ export const getInstance = async (challengeId, teamId) => {
     return instance
   }
 
-  const pods = await getPodsByLabel(
+  const deployment = await getDeployment(
     namespace.metadata.name,
-    `${LABEL_POD}=${challengeConfig.expose.pod}`
+    challengeConfig.expose.pod
   )
-  if (pods.length === 0) {
+  if (deployment === null) {
     instance.status = 'Unknown'
     return instance
   }
 
-  const status = pods[0].status.phase
+  const status =
+    (deployment.status.availableReplicas ?? 0) > 0 ? 'Running' : 'Pending'
   instance.status = status
 
-  if (status === 'Running' || status === 'Pending') {
-    const instanceId = namespace.metadata.labels[LABEL_INSTANCE]
-    const { kind } = challengeConfig.expose
-    instance.server = getServer(challengeId, instanceId, kind)
+  const instanceId = namespace.metadata.labels[LABEL_INSTANCE]
+  const { kind } = challengeConfig.expose
+  instance.server = getServer(challengeId, instanceId, kind)
 
-    const creation = namespace.metadata.creationTimestamp.getTime()
-    const ttl = challengeConfig.timeout
-    const time = {
-      start: creation,
-      stop: creation + ttl,
-      remaining: remainingTime(creation, ttl),
-    }
-    instance.time = time
+  const creation = namespace.metadata.creationTimestamp.getTime()
+  const ttl = challengeConfig.timeout
+  const time = {
+    start: creation,
+    stop: creation + ttl,
+    remaining: remainingTime(creation, ttl),
   }
+  instance.time = time
 
   return instance
 }

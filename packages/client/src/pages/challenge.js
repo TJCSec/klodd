@@ -14,7 +14,7 @@ import config from '../config'
 
 import './challenge.css'
 
-import { apiRequest, useChallenge } from '../util'
+import { apiRequest, useChallenge } from '../api'
 
 const Challenge = () => {
   const { challengeId } = useParams()
@@ -53,7 +53,7 @@ const Challenge = () => {
       rollbackOnError: true,
       revalidate: false,
       populateCache: true,
-    })
+    }).catch(() => undefined)
   }
 
   const handleStop = async () => {
@@ -79,7 +79,7 @@ const Challenge = () => {
       rollbackOnError: true,
       revalidate: true,
       populateCache: false,
-    })
+    }).catch(() => undefined)
   }
 
   if (error?.status === 401) {

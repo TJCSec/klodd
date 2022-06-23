@@ -9,7 +9,7 @@ CTF challenge per-team instance runner
 - [x] delete all instances when resource is modified/deleted
 - [x] more descriptive errors (better than success: true/false)
 - [ ] ~~frontend (use swr?)~~ refactor frontend
-- [ ] recaptcha
+- [x] recaptcha
 - [ ] docker
 - [ ] test in cluster (config.kubeConfig = 'cluster')
 - [ ] better logging

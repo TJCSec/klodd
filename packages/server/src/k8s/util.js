@@ -1,17 +1,5 @@
 import k8s from '@kubernetes/client-node'
-import { coreV1Api } from './api.js'
-
-export const getPodsByLabel = async (namespace, podLabel) => {
-  const { body } = await coreV1Api.listNamespacedPod(
-    namespace,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    podLabel
-  )
-  return body.items
-}
+import { appsV1Api, coreV1Api } from './api.js'
 
 export const getNamespacesByLabel = async (namespaceLabel) => {
   const { body } = await coreV1Api.listNamespace(
@@ -22,6 +10,21 @@ export const getNamespacesByLabel = async (namespaceLabel) => {
     namespaceLabel
   )
   return body.items
+}
+
+export const getDeployment = async (namespace, deployment) => {
+  try {
+    const { body } = await appsV1Api.readNamespacedDeployment(
+      deployment,
+      namespace
+    )
+    return body
+  } catch (err) {
+    if (err instanceof k8s.HttpError && err.statusCode === 404) {
+      return null
+    }
+    throw err
+  }
 }
 
 export const getNamespace = async (namespace) => {

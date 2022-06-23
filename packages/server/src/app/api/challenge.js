@@ -23,7 +23,10 @@ const routes = async (fastify, _options) => {
           type: 'object',
           properties: {
             name: { type: 'string' },
-            status: { type: 'string' },
+            status: {
+              type: 'string',
+              enum: ['Stopped', 'Terminating', 'Unknown', 'Running', 'Pending'],
+            },
             timeout: { type: 'integer' },
             server: {
               type: 'object',
@@ -71,7 +74,7 @@ const routes = async (fastify, _options) => {
           type: 'object',
           properties: {
             name: { type: 'string' },
-            status: { type: 'string' },
+            status: { const: 'Pending' },
             timeout: { type: 'integer' },
             server: {
               type: 'object',

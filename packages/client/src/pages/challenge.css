@@ -17,7 +17,7 @@
   color: var(--color-green);
 }
 
-.status-failed {
+.status-unknown {
   color: var(--color-red);
 }
 
@@ -26,12 +26,17 @@
 }
 
 .btn {
+  margin-top: 0.5rem;
   padding: 0.5em 1em;
   font-size: large;
-  border-radius: 3px;
+  border-radius: 5px;
   border: none;
   cursor: pointer;
   color: white;
+}
+
+.btn:hover {
+  filter: brightness(95%);
 }
 
 .btn-stop {
