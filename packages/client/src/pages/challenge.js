@@ -33,19 +33,23 @@ const Challenge = () => {
   }
 
   const handleStart = async () => {
-    const recaptcha = await execRecaptcha()
-    const req = apiRequest('POST', `/api/challenge/${challengeId}/create`, {
-      recaptcha,
-    })
-    const promise = toast.promise(req, {
-      pending: 'Starting instance',
-      success: 'Instance started',
-      error: {
-        render({ data }) {
-          return data.message
-        },
+    const promise = toast.promise(
+      async () => {
+        const recaptcha = await execRecaptcha()
+        return apiRequest('POST', `/api/challenge/${challengeId}/create`, {
+          recaptcha,
+        })
       },
-    })
+      {
+        pending: 'Starting instance',
+        success: 'Instance started',
+        error: {
+          render({ data }) {
+            return data?.message ?? 'Could not start instance'
+          },
+        },
+      }
+    )
     mutate(promise, {
       optimisticData: produce(data, (draft) => {
         draft.status = 'Pending'
@@ -57,19 +61,23 @@ const Challenge = () => {
   }
 
   const handleStop = async () => {
-    const recaptcha = await execRecaptcha()
-    const req = apiRequest('POST', `/api/challenge/${challengeId}/delete`, {
-      recaptcha,
-    })
-    const promise = toast.promise(req, {
-      pending: 'Stopping instance',
-      success: 'Instance stopped',
-      error: {
-        render({ data }) {
-          return data.message
-        },
+    const promise = toast.promise(
+      async () => {
+        const recaptcha = await execRecaptcha()
+        return apiRequest('POST', `/api/challenge/${challengeId}/delete`, {
+          recaptcha,
+        })
       },
-    })
+      {
+        pending: 'Stopping instance',
+        success: 'Instance stopped',
+        error: {
+          render({ data }) {
+            return data?.message ?? 'Could not stop instance'
+          },
+        },
+      }
+    )
     mutate(promise, {
       optimisticData: produce(data, (draft) => {
         draft.status = 'Terminating'
@@ -106,7 +114,9 @@ const Challenge = () => {
   if (!data) {
     return (
       <>
-        <p>Loading...</p>
+        <h1>Loading</h1>
+        <p>Waiting for challenge data...</p>
+        <Spinner className="status-spinner" />
       </>
     )
   }
