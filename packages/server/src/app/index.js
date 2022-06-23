@@ -1,5 +1,10 @@
+import path from 'path'
+import { promises as fs } from 'fs'
+import { fileURLToPath } from 'url'
+
 import Fastify from 'fastify'
 import sensible from '@fastify/sensible'
+import fastifyStatic from '@fastify/static'
 
 import config from '../config.js'
 import api from './api/index.js'
@@ -7,7 +12,9 @@ import jwt from './jwt.js'
 import recaptcha from './recaptcha.js'
 
 const fastify = Fastify({
-  logger: true,
+  logger: {
+    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  },
   ignoreTrailingSlash: true,
 })
 
@@ -18,19 +25,36 @@ fastify.register(api, {
   prefix: '/api',
 })
 
-const clientConfig = `window.config = ${JSON.stringify({
+const clientConfig = JSON.stringify({
   publicUrl: config.publicUrl,
   recaptcha: config.recaptcha.siteKey,
   rctfUrl: config.rctfUrl,
-})}`
-
-fastify.route({
-  method: 'GET',
-  url: '/config.js',
-  handler: (_req, res) => {
-    res.type('text/javascript')
-    return clientConfig
-  },
 })
+
+if (process.env.NODE_ENV === 'production') {
+  const dirname = path.dirname(fileURLToPath(import.meta.url))
+  const buildPath = path.resolve(dirname, '../../../../build')
+  const indexHtml = path.join(buildPath, 'index.html')
+  const indexTemplate = await fs.readFile(indexHtml, 'utf8')
+  const rendered = indexTemplate.replace('{{ config }}', clientConfig)
+
+  const handler = async (_req, res) => {
+    res.type('text/html; charset=UTF-8')
+    return res.send(rendered)
+  }
+
+  fastify.get('/', handler)
+  fastify.get('/index.html', async (req, res) => res.redirect(301, '/'))
+  fastify.setNotFoundHandler(handler)
+
+  fastify.register(fastifyStatic, {
+    root: buildPath,
+  })
+} else {
+  fastify.get('/config.js', async (_req, res) => {
+    res.type('text/javascript')
+    return res.send(`window.config = ${clientConfig}`)
+  })
+}
 
 export default fastify

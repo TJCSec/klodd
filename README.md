@@ -10,9 +10,10 @@ CTF challenge per-team instance runner
 - [x] more descriptive errors (better than success: true/false)
 - [ ] ~~frontend (use swr?)~~ refactor frontend
 - [x] recaptcha
-- [ ] docker
-- [ ] test in cluster (config.kubeConfig = 'cluster')
+- [x] docker
+- [x] test in cluster (config.kubeConfig = 'cluster')
 - [ ] better logging
+- [ ] github actions build docker
 
 ## medium priority
 - [ ] design better api (response types maybe)
@@ -74,10 +75,10 @@ You must use [Traefik](https://traefik.io/traefik/) as an ingress controller wit
 Each challenge is configured using a custom resource. Before you can do this, you must apply the [definitions](manifests/klodd-crd.yaml).
 
 ### Running Klodd
-**There is currently no Docker build available, and Klodd has not been tested in-cluster.**
+service account with [rbac](manifests/klodd-rbac.yaml), normal deployment/service/ingress, mount config through secret
 
 ## Configuration
-**Configuration is currently not possible.** It will most likely be through YAML/JSON files mounted from secrets.
+yaml in the folder, can change folder location with env KLODD_CONFIG
 
 ## Deploying Challenges
 Each instanced challenge is stored as a custom resource. Refer to the schema in the resource definition. If you are using Terraform, you can use `kubernetes_manifest` for this.

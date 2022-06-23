@@ -10,6 +10,8 @@
   "scripts": {
     "start": "lerna run start --stream",
     "format": "lerna run format",
-    "lint": "lerna run lint"
+    "lint": "lerna run lint",
+    "build": "lerna run build",
+    "bootstrap": "lerna bootstrap"
   }
 }

@@ -7,12 +7,17 @@
   "dependencies": {
     "@fastify/jwt": "^6.1.0",
     "@fastify/sensible": "^5.0.0",
+    "@fastify/static": "^6.4.0",
     "@kubernetes/client-node": "^0.16.3",
+    "ajv": "^8.11.0",
+    "better-ajv-errors": "^1.2.0",
+    "deepmerge": "^4.2.2",
     "dotenv": "^16.0.1",
     "fastify": "^4.0.3",
     "fastify-plugin": "^3.0.1",
     "got": "^12.1.0",
-    "jsonwebtoken": "^8.5.1"
+    "jsonwebtoken": "^8.5.1",
+    "yaml": "^2.1.1"
   },
   "devDependencies": {
     "eslint": "^7.32.0 || ^8.2.0",

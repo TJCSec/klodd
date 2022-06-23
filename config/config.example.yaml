@@ -1,0 +1,16 @@
+challengeDomain: localhost.direct
+kubeConfig: default
+publicUrl: http://localhost:3000
+rctfUrl: https://ctf.tjctf.org
+traefik:
+  httpEntrypoint: websecure
+  tcpEntrypoint: tcp
+  tcpPort: 1337
+ingress:
+  namespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: traefik
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: traefik
+secretKey: something random
