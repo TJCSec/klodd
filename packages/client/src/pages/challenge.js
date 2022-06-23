@@ -1,97 +1,43 @@
 import classnames from 'classnames'
 import produce from 'immer'
+import { useRef } from 'react'
+import ReCAPTCHA from 'react-google-recaptcha'
 import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import useSWR from 'swr'
 
-import TimeAgo from 'react-timeago'
+import TimeAgo from 'react-time-ago'
 
 import AuthButton from '../components/authbutton'
 import Server from '../components/server'
 import Spinner from '../components/spinner'
+import config from '../config'
+
 import './challenge.css'
 
-const timeFmt = (value, unit, suffix) => {
-  if (suffix === 'from now') {
-    return `in ${value} ${unit}${value > 1 ? 's' : ''}`
-  } else {
-    return 'now'
-  }
-}
-
-const apiRequest = async (challengeId, method = 'GET') => {
-  const res = await fetch(`/api/challenge/${challengeId}`, {
-    method,
-    headers: {
-      authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
-    },
-  })
-
-  if (!res.ok) {
-    const info = await res.json()
-    const error = new Error(info.message)
-    error.info = info
-    error.status = res.status
-    throw error
-  }
-
-  if (res.status !== 204) {
-    return res.json()
-  } else {
-    return null
-  }
-}
-
-const useChallenge = (challengeId) =>
-  useSWR(challengeId, apiRequest, {
-    // https://github.com/vercel/swr/blob/790e044d9d7d58194c2493a24073f23272af99c2/_internal/utils/config.ts#L16-L38
-    onErrorRetry: (error, _key, config, revalidate, opts) => {
-      if (error.status === 401 || error.status === 404) {
-        return
-      }
-
-      const maxRetryCount = config.errorRetryCount
-      const currentRetryCount = opts.retryCount
-
-      const timeout =
-        ~~(
-          (Math.random() + 0.5) *
-          (1 << (currentRetryCount < 8 ? currentRetryCount : 8))
-        ) * config.errorRetryInterval
-
-      if (maxRetryCount !== undefined && currentRetryCount > maxRetryCount) {
-        return
-      }
-
-      setTimeout(revalidate, timeout, opts)
-    },
-    refreshInterval: (data) => {
-      if (data === undefined) {
-        return 0
-      }
-      if (data.status === 'Pending') {
-        return 1000
-      } else if (data.status === 'Terminating') {
-        return 2000
-      } else if (data.status === 'Running') {
-        return data.time.remaining < 5000 ? 1000 : 5000
-      } else {
-        return 0
-      }
-    },
-  })
+import { apiRequest, useChallenge } from '../util'
 
 const Challenge = () => {
   const { challengeId } = useParams()
   const { data, error, mutate } = useChallenge(challengeId)
+  const recaptchaRef = useRef(null)
 
   const handleAuth = (token) => {
     localStorage.setItem('token', token)
     mutate()
   }
 
-  const handleStart = () => {
-    const promise = toast.promise(apiRequest(challengeId, 'POST'), {
+  const execRecaptcha = async () => {
+    const token = await recaptchaRef.current.executeAsync()
+    recaptchaRef.current.reset()
+    return token
+  }
+
+  const handleStart = async () => {
+    const recaptcha = await execRecaptcha()
+    const req = apiRequest('POST', `/api/challenge/${challengeId}/create`, {
+      recaptcha,
+    })
+    const promise = toast.promise(req, {
       pending: 'Starting instance',
       success: 'Instance started',
       error: {
@@ -110,8 +56,12 @@ const Challenge = () => {
     })
   }
 
-  const handleStop = () => {
-    const promise = toast.promise(apiRequest(challengeId, 'DELETE'), {
+  const handleStop = async () => {
+    const recaptcha = await execRecaptcha()
+    const req = apiRequest('POST', `/api/challenge/${challengeId}/delete`, {
+      recaptcha,
+    })
+    const promise = toast.promise(req, {
       pending: 'Stopping instance',
       success: 'Instance stopped',
       error: {
@@ -137,10 +87,7 @@ const Challenge = () => {
       <>
         <h1>Unauthenticated</h1>
         <p>You are currently unauthenticated.</p>
-        <AuthButton
-          className="challenge-button auth"
-          onAuthSuccess={handleAuth}
-        >
+        <AuthButton className="btn btn-auth" onAuthSuccess={handleAuth}>
           Authenticate
         </AuthButton>
       </>
@@ -185,7 +132,7 @@ const Challenge = () => {
       )}
       {data.time && (
         <p>
-          Stopping <TimeAgo date={data.time.stop} formatter={timeFmt} />
+          Stopping <TimeAgo future date={data.time.stop} />
         </p>
       )}
       {data.status === 'Stopped' && (
@@ -206,6 +153,12 @@ const Challenge = () => {
           )}
         />
       )}
+      <ReCAPTCHA
+        ref={recaptchaRef}
+        sitekey={config.recaptcha}
+        badge="bottomright"
+        size="invisible"
+      />
     </>
   )
 }

@@ -1,12 +1,16 @@
 const config = {
-  challengeDomain: 'tjc.tf',
+  challengeDomain: 'localhost.direct',
   kubeConfig: 'default',
   port: 5000,
   publicUrl: 'http://localhost:3000',
   rctfUrl: 'https://ctf.tjctf.org',
   recaptcha: {
-    siteKey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
-    secretKey: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe',
+    siteKey:
+      process.env.KLODD_RECAPTCHA_SITE ||
+      '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
+    secretKey:
+      process.env.KLODD_RECAPTCHA_SECRET ||
+      '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe',
   },
   secretKey: 'asdfasdfasdfasdf',
   traefik: {

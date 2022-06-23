@@ -1,6 +1,6 @@
 import got from 'got'
 
-import config from './config.js'
+import config from '../config.js'
 
 const getTeam = async (token) => {
   const { kind, data } = await got({

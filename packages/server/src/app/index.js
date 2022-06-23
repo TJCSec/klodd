@@ -4,6 +4,7 @@ import sensible from '@fastify/sensible'
 import config from '../config.js'
 import api from './api/index.js'
 import jwt from './jwt.js'
+import recaptcha from './recaptcha.js'
 
 const fastify = Fastify({
   logger: true,
@@ -12,6 +13,7 @@ const fastify = Fastify({
 
 fastify.register(sensible)
 fastify.register(jwt)
+fastify.register(recaptcha)
 fastify.register(api, {
   prefix: '/api',
 })

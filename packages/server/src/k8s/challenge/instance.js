@@ -97,7 +97,7 @@ export const createInstance = async (challengeId, teamId) => {
     apiResponse = await coreV1Api.createNamespace(namespaceManifest)
   } catch (err) {
     if (err instanceof k8s.HttpError && err.statusCode === 409) {
-      throw new InstanceCreationError('Instance is already running.', err)
+      throw new InstanceCreationError('Instance is already running', err)
     }
     throw err
   }
@@ -120,7 +120,7 @@ export const createInstance = async (challengeId, teamId) => {
       )
     )
   } catch (err) {
-    throw new InstanceCreationError('Could not create network policies.')
+    throw new InstanceCreationError('Could not create network policies')
   }
 
   const makeDeployment = makeDeploymentFactory(commonLabels)
@@ -135,7 +135,7 @@ export const createInstance = async (challengeId, teamId) => {
       )
     )
   } catch (err) {
-    throw new InstanceCreationError('Could not create deployments.')
+    throw new InstanceCreationError('Could not create deployments')
   }
 
   const makeService = makeServiceFactory(commonLabels)
@@ -150,7 +150,7 @@ export const createInstance = async (challengeId, teamId) => {
       )
     )
   } catch (err) {
-    throw new InstanceCreationError('Could not create services.')
+    throw new InstanceCreationError('Could not create services')
   }
 
   try {
@@ -185,7 +185,7 @@ export const createInstance = async (challengeId, teamId) => {
       )
     }
   } catch (err) {
-    throw new InstanceCreationError('Could not create ingress.')
+    throw new InstanceCreationError('Could not create ingress')
   }
 
   return {

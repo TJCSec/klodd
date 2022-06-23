@@ -1,4 +1,4 @@
-import getTeam from '../../rctf.js'
+import getTeam from '../rctf.js'
 
 const routes = async (fastify, _options) => {
   fastify.route({
