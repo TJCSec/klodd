@@ -55,7 +55,7 @@ const Challenge = () => {
         draft.status = 'Pending'
       }),
       rollbackOnError: true,
-      revalidate: false,
+      revalidate: true,
       populateCache: true,
     }).catch(() => undefined)
   }
@@ -86,7 +86,7 @@ const Challenge = () => {
       }),
       rollbackOnError: true,
       revalidate: true,
-      populateCache: false,
+      populateCache: true,
     }).catch(() => undefined)
   }
 

@@ -101,7 +101,6 @@ const routes = async (fastify, _options) => {
       } catch (err) {
         if (err instanceof InstanceCreationError) {
           req.log.error(err.cause)
-          await deleteInstance(challengeId, teamId)
           return res.conflict(err.message)
         }
         req.log.error(err)
@@ -124,6 +123,12 @@ const routes = async (fastify, _options) => {
       response: {
         200: {
           type: 'object',
+          properties: {
+            name: { type: 'string' },
+            status: { const: 'Terminating' },
+            timeout: { type: 'integer' },
+          },
+          required: ['name', 'status', 'timeout'],
         },
       },
     },
@@ -132,8 +137,7 @@ const routes = async (fastify, _options) => {
       const { challengeId } = req.params
       const teamId = req.user.sub
       try {
-        await deleteInstance(challengeId, teamId)
-        return {}
+        return deleteInstance(challengeId, teamId)
       } catch (err) {
         fastify.log.error(err)
         return res.internalServerError('Unknown error deleting instance')

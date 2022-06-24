@@ -195,5 +195,12 @@ export const createInstance = async (challengeId, teamId) => {
   }
 }
 
-export const deleteInstance = async (challengeId, teamId) =>
-  deleteNamespace(getNamespaceName(challengeId, teamId))
+export const deleteInstance = async (challengeId, teamId) => {
+  const challengeConfig = challengeResources.get(challengeId)
+  await deleteNamespace(getNamespaceName(challengeId, teamId))
+  return {
+    name: challengeConfig.name,
+    status: 'Terminating',
+    timeout: challengeConfig.timeout,
+  }
+}
