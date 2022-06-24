@@ -3,11 +3,11 @@
   --color-red: #d41d1d;
   --color-blue: #0e77ce;
   --color-orange: #eea318;
-  --toastify-color-light: #eee;
   --toastify-color-info: var(--color-blue);
   --toastify-color-success: var(--color-green);
   --toastify-color-warning: var(--color-orange);
   --toastify-color-error: var(--color-red);
+  --toastify-font-family: var(--font-family);
 }
 
 .app {
@@ -21,16 +21,49 @@
   box-sizing: border-box;
   width: 90%;
   max-width: 500px;
-  background-color: #eee;
   padding: 2rem;
-  border-radius: 5px;
+  border-radius: 7px;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   align-items: flex-start;
   position: relative;
+  background-color: var(--color-content-background);
+}
+
+#root {
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 .content > * {
   margin: 0;
+}
+
+a {
+  color: var(--color-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: whitesmoke;
+    --color-content-background: #151515;
+    --color-background: #222222;
+    --toastify-color-light: var(--color-content-background);
+    --toastify-text-color-light: var(--color-text);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-text: #222222;
+    --color-content-background: #eee;
+    --color-background: #fafafa;
+    --toastify-color-light: var(--color-content-background);
+    --toastify-text-color-light: var(--color-text);
+  }
+  :root {
+    --toastify-color-light: #eee;
+    --toastify-color-dark: #111;
+  }
 }

@@ -1,12 +1,11 @@
 .status-text {
   font-weight: bold;
-  color: black;
 }
 
 .status-spinner {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 2rem;
+  right: 2rem;
 }
 
 .status-pending {
@@ -25,6 +24,10 @@
   color: var(--color-blue);
 }
 
+.status-stopped {
+  color: var(--color-text);
+}
+
 .btn {
   margin-top: 0.5rem;
   padding: 0.5em 1em;
@@ -33,6 +36,7 @@
   border: none;
   cursor: pointer;
   color: white;
+  font-family: var(--font-family);
 }
 
 .btn:hover {

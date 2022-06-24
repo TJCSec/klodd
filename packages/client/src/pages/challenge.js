@@ -165,6 +165,7 @@ const Challenge = () => {
       )}
       <ReCAPTCHA
         ref={recaptchaRef}
+        theme={window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'}
         sitekey={config.recaptcha}
         badge="bottomright"
         size="invisible"
