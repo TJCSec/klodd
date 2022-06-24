@@ -1,0 +1,39 @@
+name: CI
+on:
+  push:
+    branches: [master]
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+
+    steps:
+      - name: Log in to the Container registry
+        uses: docker/login-action@d398f07826957cd0a18ea1b059cf1207835e60bc
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@97c170d70b5f8bfc77e6b23e68381f217cb64ded
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,enable=true,event=branch
+            type=sha,enable=true,prefix=,format=long
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@42863b1282f7046f6c1ec9222965bbceafae3bb8
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
