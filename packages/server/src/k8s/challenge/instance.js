@@ -119,7 +119,7 @@ export const createInstance = async (challengeId, teamId) => {
       )
     )
   } catch (err) {
-    throw new InstanceCreationError('Could not create network policies')
+    throw new InstanceCreationError('Could not create network policies', err)
   }
 
   const makeDeployment = makeDeploymentFactory(commonLabels)
@@ -134,7 +134,7 @@ export const createInstance = async (challengeId, teamId) => {
       )
     )
   } catch (err) {
-    throw new InstanceCreationError('Could not create deployments')
+    throw new InstanceCreationError('Could not create deployments', err)
   }
 
   const makeService = makeServiceFactory(commonLabels)
@@ -149,7 +149,7 @@ export const createInstance = async (challengeId, teamId) => {
       )
     )
   } catch (err) {
-    throw new InstanceCreationError('Could not create services')
+    throw new InstanceCreationError('Could not create services', err)
   }
 
   try {
@@ -184,7 +184,7 @@ export const createInstance = async (challengeId, teamId) => {
       )
     }
   } catch (err) {
-    throw new InstanceCreationError('Could not create ingress')
+    throw new InstanceCreationError('Could not create ingress', err)
   }
 
   return {

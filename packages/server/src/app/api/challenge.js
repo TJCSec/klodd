@@ -100,10 +100,11 @@ const routes = async (fastify, _options) => {
         return instance
       } catch (err) {
         if (err instanceof InstanceCreationError) {
+          req.log.error(err.cause)
           await deleteInstance(challengeId, teamId)
           return res.conflict(err.message)
         }
-        fastify.log.error(err)
+        req.log.error(err)
         return res.internalServerError('Unknown error creating instance')
       }
     },
