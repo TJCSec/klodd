@@ -24,7 +24,3 @@
 .content > * {
   margin: 0;
 }
-
-a {
-  color: var(--color-text);
-}

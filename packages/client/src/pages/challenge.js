@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import TimeAgo from 'react-time-ago'
 
 import AuthButton from '../components/authbutton'
+import Button from '../components/button'
 import Server from '../components/server'
 import Spinner from '../components/spinner'
 import config from '../config'
@@ -139,7 +140,7 @@ const Challenge = () => {
       </p>
       {data.server && (
         <p>
-          Server: <Server {...data.server} />
+          <Server {...data.server} />
         </p>
       )}
       {data.time && (
@@ -148,14 +149,14 @@ const Challenge = () => {
         </p>
       )}
       {data.status === 'Stopped' && (
-        <button className="btn btn-start" onClick={handleStart}>
+        <Button className="btn btn-start" onClick={handleStart}>
           Start
-        </button>
+        </Button>
       )}
       {data.status === 'Running' && (
-        <button className="btn btn-stop" onClick={handleStop}>
+        <Button className="btn btn-stop" onClick={handleStop}>
           Stop
-        </button>
+        </Button>
       )}
       {(data.status === 'Pending' || data.status === 'Terminating') && (
         <Spinner

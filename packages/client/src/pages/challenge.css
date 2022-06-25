@@ -28,29 +28,17 @@
   color: var(--color-text);
 }
 
-.btn {
-  margin-top: 0.5rem;
-  padding: 0.5em 1em;
-  font-size: large;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  color: white;
-  font-family: inherit;
-}
-
-.btn:hover {
-  filter: brightness(95%);
-}
-
 .btn-stop {
+  color: var(--color-red);
   background-color: var(--color-red);
 }
 
 .btn-start {
+  color: var(--color-green);
   background-color: var(--color-green);
 }
 
 .btn-auth {
+  color: var(--color-blue);
   background-color: var(--color-blue);
 }
