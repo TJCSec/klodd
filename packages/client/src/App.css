@@ -1,20 +1,10 @@
-:root {
-  --color-green: #33af1a;
-  --color-red: #d41d1d;
-  --color-blue: #0e77ce;
-  --color-orange: #eea318;
-  --toastify-color-info: var(--color-blue);
-  --toastify-color-success: var(--color-green);
-  --toastify-color-warning: var(--color-orange);
-  --toastify-color-error: var(--color-red);
-  --toastify-font-family: var(--font-family);
-}
-
 .app {
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 .content {
@@ -31,39 +21,10 @@
   background-color: var(--color-content-background);
 }
 
-#root {
-  background-color: var(--color-background);
-  color: var(--color-text);
-}
-
 .content > * {
   margin: 0;
 }
 
 a {
   color: var(--color-text);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-text: whitesmoke;
-    --color-content-background: #151515;
-    --color-background: #222222;
-    --toastify-color-light: var(--color-content-background);
-    --toastify-text-color-light: var(--color-text);
-  }
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --color-text: #222222;
-    --color-content-background: #eee;
-    --color-background: #fafafa;
-    --toastify-color-light: var(--color-content-background);
-    --toastify-text-color-light: var(--color-text);
-  }
-  :root {
-    --toastify-color-light: #eee;
-    --toastify-color-dark: #111;
-  }
 }

@@ -4,15 +4,41 @@ body,
   height: 100%;
 }
 
-:root {
-  --font-family: 'Inter', sans-serif;
-}
-
 body {
   margin: 0;
-  font-family: var(--font-family);
+  font-family: 'Inter', sans-serif;
 }
 
 code {
   font-family: 'Courier New', Courier, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #f5f5f5;
+    --color-content-background: #151515;
+    --color-background: #222222;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-text: #222222;
+    --color-content-background: #ebebeb;
+    --color-background: #f5f5f5;
+  }
+}
+
+:root {
+  --color-green: #33af1a;
+  --color-red: #d41d1d;
+  --color-blue: #0e77ce;
+  --color-orange: #eea318;
+  --toastify-color-light: #ebebeb;
+  --toastify-color-dark: #151515;
+  --toastify-color-info: var(--color-blue);
+  --toastify-color-success: var(--color-green);
+  --toastify-color-warning: var(--color-orange);
+  --toastify-color-error: var(--color-red);
+  --toastify-font-family: inherit;
 }
