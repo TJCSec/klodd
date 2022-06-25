@@ -183,7 +183,7 @@ const Challenge = () => {
           Start
         </Button>
       )}
-      {data.status === 'Running' && (
+      {(data.status === 'Running' || data.status === 'Starting') && (
         <Button className="btn-stop" onClick={handleStop}>
           Stop
         </Button>
