@@ -36,7 +36,7 @@
   border: none;
   cursor: pointer;
   color: white;
-  font-family: var(--font-family);
+  font-family: inherit;
 }
 
 .btn:hover {
