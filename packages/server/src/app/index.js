@@ -44,7 +44,7 @@ const clientConfig = JSON.stringify({
 
 if (process.env.NODE_ENV === 'production') {
   const dirname = path.dirname(fileURLToPath(import.meta.url))
-  const buildPath = path.resolve(dirname, '../../../../build')
+  const buildPath = path.resolve(dirname, '../../../client/build')
   const indexHtml = path.join(buildPath, 'index.html')
   const indexTemplate = await fs.readFile(indexHtml, 'utf8')
   const rendered = indexTemplate.replace('{{ config }}', clientConfig)
