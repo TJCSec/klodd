@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
@@ -9,13 +9,27 @@ import en from 'javascript-time-ago/locale/en.json'
 
 import './index.css'
 import App from './App'
+import { ColorThemeProvider, ColorThemeContext } from './components/colortheme'
+
+import '@fontsource/inter'
 
 TimeAgo.addDefaultLocale(en)
 
+const ThemedToastContainer = ({ children, ...props }) => {
+  const theme = useContext(ColorThemeContext)
+  return (
+    <ToastContainer theme={theme} {...props}>
+      {children}
+    </ToastContainer>
+  )
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
-  <BrowserRouter>
-    <App />
-    <ToastContainer />
-  </BrowserRouter>
+  <ColorThemeProvider>
+    <BrowserRouter>
+      <App />
+      <ThemedToastContainer />
+    </BrowserRouter>
+  </ColorThemeProvider>
 )

@@ -1,36 +1,30 @@
-:root {
-  --color-green: #33af1a;
-  --color-red: #d41d1d;
-  --color-blue: #0e77ce;
-  --color-orange: #eea318;
-  --toastify-color-light: #eee;
-  --toastify-color-info: var(--color-blue);
-  --toastify-color-success: var(--color-green);
-  --toastify-color-warning: var(--color-orange);
-  --toastify-color-error: var(--color-red);
-}
-
 .app {
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 .content {
   box-sizing: border-box;
   width: 90%;
   max-width: 500px;
-  background-color: #eee;
   padding: 2rem;
-  border-radius: 5px;
+  border-radius: 7px;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   align-items: flex-start;
   position: relative;
+  background-color: var(--color-content-background);
 }
 
 .content > * {
   margin: 0;
+}
+
+.content > .btn {
+  margin-top: 0.5rem;
 }
