@@ -1,6 +1,6 @@
 import classnames from 'classnames'
 import produce from 'immer'
-import { useRef } from 'react'
+import { useContext, useRef } from 'react'
 import ReCAPTCHA from 'react-google-recaptcha'
 import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -15,11 +15,13 @@ import config from '../config'
 import './challenge.css'
 
 import { apiRequest, useChallenge } from '../api'
+import { ColorThemeContext } from '../components/colortheme'
 
 const Challenge = () => {
   const { challengeId } = useParams()
   const { data, error, mutate } = useChallenge(challengeId)
   const recaptchaRef = useRef(null)
+  const theme = useContext(ColorThemeContext)
 
   const handleAuth = (token) => {
     localStorage.setItem('token', token)
@@ -165,7 +167,7 @@ const Challenge = () => {
       )}
       <ReCAPTCHA
         ref={recaptchaRef}
-        theme={window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'}
+        theme={theme}
         sitekey={config.recaptcha}
         badge="bottomright"
         size="invisible"
