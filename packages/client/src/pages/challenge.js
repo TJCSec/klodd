@@ -127,34 +127,27 @@ const Challenge = () => {
   return (
     <>
       <h1>{data.name}</h1>
-      <p>
-        Status:{' '}
-        <span
-          className={classnames(
-            'status-text',
-            'status-' + data.status.toLowerCase()
-          )}
-        >
-          {data.status}
-        </span>
-      </p>
-      {data.server && (
-        <p>
-          <Server {...data.server} />
-        </p>
-      )}
+      <span
+        className={classnames(
+          'status-text',
+          `status-${data.status.toLowerCase()}`
+        )}
+      >
+        {data.status}
+      </span>
+      {data.server && <Server {...data.server} />}
       {data.time && (
         <p>
           Stopping <TimeAgo future date={data.time.stop} />
         </p>
       )}
       {data.status === 'Stopped' && (
-        <Button className="btn btn-start" onClick={handleStart}>
+        <Button className="btn-start" onClick={handleStart}>
           Start
         </Button>
       )}
       {data.status === 'Running' && (
-        <Button className="btn btn-stop" onClick={handleStop}>
+        <Button className="btn-stop" onClick={handleStop}>
           Stop
         </Button>
       )}
