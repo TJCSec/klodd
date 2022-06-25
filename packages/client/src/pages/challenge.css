@@ -8,7 +8,7 @@
   right: 2rem;
 }
 
-.status-pending {
+.status-starting {
   color: var(--color-orange);
 }
 
@@ -20,7 +20,7 @@
   color: var(--color-red);
 }
 
-.status-terminating {
+.status-stopping {
   color: var(--color-blue);
 }
 

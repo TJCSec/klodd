@@ -80,7 +80,7 @@ const Challenge = () => {
       }),
       {
         pending: 'Starting instance',
-        success: 'Instance started',
+        success: 'Instance starting',
         error: {
           render({ data }) {
             return data?.message ?? 'Could not start instance'
@@ -90,7 +90,7 @@ const Challenge = () => {
     )
     mutate(promise, {
       optimisticData: produce(data, (draft) => {
-        draft.status = 'Pending'
+        draft.status = 'Starting'
       }),
       rollbackOnError: true,
       revalidate: true,
@@ -110,7 +110,7 @@ const Challenge = () => {
       }),
       {
         pending: 'Stopping instance',
-        success: 'Instance stopped',
+        success: 'Instance stopping',
         error: {
           render({ data }) {
             return data?.message ?? 'Could not stop instance'
@@ -120,7 +120,7 @@ const Challenge = () => {
     )
     mutate(promise, {
       optimisticData: produce(data, (draft) => {
-        draft.status = 'Terminating'
+        draft.status = 'Stopping'
         delete draft.server
         delete draft.time
       }),
@@ -188,7 +188,7 @@ const Challenge = () => {
           Stop
         </Button>
       )}
-      {(data.status === 'Pending' || data.status === 'Terminating') && (
+      {(data.status === 'Starting' || data.status === 'Stopping') && (
         <Spinner
           className={classnames(
             'status-spinner',

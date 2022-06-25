@@ -11,9 +11,20 @@ import api from './api/index.js'
 import jwt from './jwt.js'
 import recaptcha from './recaptcha.js'
 
+const production = process.env.NODE_ENV === 'production'
+
 const fastify = Fastify({
   logger: {
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+    level: production ? 'info' : 'debug',
+    transport: production
+      ? undefined
+      : {
+          target: 'pino-pretty',
+          options: {
+            translateTime: 'HH:MM:ss Z',
+            ignore: 'pid,hostname',
+          },
+        },
   },
   ignoreTrailingSlash: true,
 })
