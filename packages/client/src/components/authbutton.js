@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
+import Button from './button'
 import config from '../config'
 
 const getState = () =>
@@ -87,9 +88,9 @@ const AuthButton = ({ onAuthSuccess, children, ...props }) => {
   })
 
   return (
-    <button {...props} onClick={handleAuth}>
+    <Button {...props} onClick={handleAuth}>
       {children}
-    </button>
+    </Button>
   )
 }
 

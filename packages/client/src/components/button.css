@@ -1,0 +1,34 @@
+.btn {
+  padding: 0.5em 1em;
+  font-size: large;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  position: relative;
+}
+
+.btn:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: 0 3px 0;
+  border-radius: inherit;
+  filter: brightness(0.5);
+}
+
+.btn:hover {
+  filter: brightness(0.9);
+}
+
+.btn:active {
+  top: 3px;
+}
+
+.btn:active:after {
+  box-shadow: none;
+}
+
+.btn-content {
+  color: white;
+}

@@ -1,6 +1,6 @@
 import classnames from 'classnames'
 import produce from 'immer'
-import { useRef } from 'react'
+import { useContext, useRef } from 'react'
 import ReCAPTCHA from 'react-google-recaptcha'
 import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import TimeAgo from 'react-time-ago'
 
 import AuthButton from '../components/authbutton'
+import Button from '../components/button'
 import Server from '../components/server'
 import Spinner from '../components/spinner'
 import config from '../config'
@@ -15,11 +16,13 @@ import config from '../config'
 import './challenge.css'
 
 import { apiRequest, useChallenge } from '../api'
+import { ColorThemeContext } from '../components/colortheme'
 
 const Challenge = () => {
   const { challengeId } = useParams()
   const { data, error, mutate } = useChallenge(challengeId)
   const recaptchaRef = useRef(null)
+  const theme = useContext(ColorThemeContext)
 
   const handleAuth = (token) => {
     localStorage.setItem('token', token)
@@ -161,36 +164,29 @@ const Challenge = () => {
   return (
     <>
       <h1>{data.name}</h1>
-      <p>
-        Status:{' '}
-        <span
-          className={classnames(
-            'status-text',
-            'status-' + data.status.toLowerCase()
-          )}
-        >
-          {data.status}
-        </span>
-      </p>
-      {data.server && (
-        <p>
-          Server: <Server {...data.server} />
-        </p>
-      )}
+      <span
+        className={classnames(
+          'status-text',
+          `status-${data.status.toLowerCase()}`
+        )}
+      >
+        {data.status}
+      </span>
+      {data.server && <Server {...data.server} />}
       {data.time && (
         <p>
           Stopping <TimeAgo future date={data.time.stop} />
         </p>
       )}
       {data.status === 'Stopped' && (
-        <button className="btn btn-start" onClick={handleStart}>
+        <Button className="btn-start" onClick={handleStart}>
           Start
-        </button>
+        </Button>
       )}
       {data.status === 'Running' && (
-        <button className="btn btn-stop" onClick={handleStop}>
+        <Button className="btn-stop" onClick={handleStop}>
           Stop
-        </button>
+        </Button>
       )}
       {(data.status === 'Pending' || data.status === 'Terminating') && (
         <Spinner
@@ -202,6 +198,7 @@ const Challenge = () => {
       )}
       <ReCAPTCHA
         ref={recaptchaRef}
+        theme={theme}
         sitekey={config.recaptcha}
         badge="bottomright"
         size="invisible"
