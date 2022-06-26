@@ -46,7 +46,7 @@ export const getInstance = async (challengeId, teamId) => {
   }
 
   if (namespace.status.phase === 'Terminating') {
-    instance.status = 'Terminating'
+    instance.status = 'Stopping'
     return instance
   }
 
@@ -60,7 +60,7 @@ export const getInstance = async (challengeId, teamId) => {
   }
 
   const status =
-    (deployment.status.availableReplicas ?? 0) > 0 ? 'Running' : 'Pending'
+    (deployment.status.availableReplicas ?? 0) > 0 ? 'Running' : 'Starting'
   instance.status = status
 
   const instanceId = namespace.metadata.labels[LABEL_INSTANCE]
@@ -189,11 +189,18 @@ export const createInstance = async (challengeId, teamId) => {
 
   return {
     name: challengeConfig.name,
-    status: 'Pending',
+    status: 'Starting',
     timeout: challengeConfig.timeout,
     server: getServer(challengeId, instanceId, challengeConfig.expose.kind),
   }
 }
 
-export const deleteInstance = async (challengeId, teamId) =>
-  deleteNamespace(getNamespaceName(challengeId, teamId))
+export const deleteInstance = async (challengeId, teamId) => {
+  const challengeConfig = challengeResources.get(challengeId)
+  await deleteNamespace(getNamespaceName(challengeId, teamId))
+  return {
+    name: challengeConfig.name,
+    status: 'Stopping',
+    timeout: challengeConfig.timeout,
+  }
+}

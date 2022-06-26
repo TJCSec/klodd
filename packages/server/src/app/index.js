@@ -11,9 +11,20 @@ import api from './api/index.js'
 import jwt from './jwt.js'
 import recaptcha from './recaptcha.js'
 
+const production = process.env.NODE_ENV === 'production'
+
 const fastify = Fastify({
   logger: {
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+    level: production ? 'info' : 'debug',
+    transport: production
+      ? undefined
+      : {
+          target: 'pino-pretty',
+          options: {
+            translateTime: 'HH:MM:ss Z',
+            ignore: 'pid,hostname',
+          },
+        },
   },
   ignoreTrailingSlash: true,
 })
@@ -33,7 +44,7 @@ const clientConfig = JSON.stringify({
 
 if (process.env.NODE_ENV === 'production') {
   const dirname = path.dirname(fileURLToPath(import.meta.url))
-  const buildPath = path.resolve(dirname, '../../../../build')
+  const buildPath = path.resolve(dirname, '../../../client/build')
   const indexHtml = path.join(buildPath, 'index.html')
   const indexTemplate = await fs.readFile(indexHtml, 'utf8')
   const rendered = indexTemplate.replace('{{ config }}', clientConfig)

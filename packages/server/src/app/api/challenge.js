@@ -25,7 +25,7 @@ const routes = async (fastify, _options) => {
             name: { type: 'string' },
             status: {
               type: 'string',
-              enum: ['Stopped', 'Terminating', 'Unknown', 'Running', 'Pending'],
+              enum: ['Stopped', 'Stopping', 'Unknown', 'Running', 'Starting'],
             },
             timeout: { type: 'integer' },
             server: {
@@ -74,7 +74,7 @@ const routes = async (fastify, _options) => {
           type: 'object',
           properties: {
             name: { type: 'string' },
-            status: { const: 'Pending' },
+            status: { const: 'Starting' },
             timeout: { type: 'integer' },
             server: {
               type: 'object',
@@ -99,12 +99,11 @@ const routes = async (fastify, _options) => {
         const instance = await createInstance(challengeId, teamId)
         return instance
       } catch (err) {
+        req.log.error(err)
         if (err instanceof InstanceCreationError) {
-          req.log.error(err.cause)
-          await deleteInstance(challengeId, teamId)
+          req.log.debug(err.cause)
           return res.conflict(err.message)
         }
-        req.log.error(err)
         return res.internalServerError('Unknown error creating instance')
       }
     },
@@ -124,6 +123,12 @@ const routes = async (fastify, _options) => {
       response: {
         200: {
           type: 'object',
+          properties: {
+            name: { type: 'string' },
+            status: { const: 'Stopping' },
+            timeout: { type: 'integer' },
+          },
+          required: ['name', 'status', 'timeout'],
         },
       },
     },
@@ -132,10 +137,9 @@ const routes = async (fastify, _options) => {
       const { challengeId } = req.params
       const teamId = req.user.sub
       try {
-        await deleteInstance(challengeId, teamId)
-        return {}
+        return deleteInstance(challengeId, teamId)
       } catch (err) {
-        fastify.log.error(err)
+        req.log.error(err)
         return res.internalServerError('Unknown error deleting instance')
       }
     },

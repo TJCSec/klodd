@@ -30,22 +30,57 @@ const Challenge = () => {
   }
 
   const execRecaptcha = async () => {
-    const token = await recaptchaRef.current.executeAsync()
+    const resetParams = {
+      isLoading: null,
+      autoClose: null,
+      closeOnClick: null,
+      closeButton: null,
+      draggable: null,
+      delay: 100,
+    }
+    let toastId = null
+    const showToast = setTimeout(() => {
+      toastId = toast.loading('Waiting for reCAPTCHA', {
+        toastId: 'recaptcha-loading',
+      })
+    }, 1000)
+
+    let token = undefined
+    try {
+      token = await recaptchaRef.current.executeAsync()
+      if (toastId) {
+        toast.dismiss(toastId)
+      }
+    } catch (err) {
+      const msg = err?.message ?? 'reCAPTCHA failed'
+      if (toastId) {
+        toast.update(toastId, {
+          ...resetParams,
+          type: 'error',
+          render: msg,
+        })
+      } else {
+        toast.error(msg)
+      }
+    }
+    clearTimeout(showToast)
     recaptchaRef.current.reset()
     return token
   }
 
   const handleStart = async () => {
+    const recaptcha = await execRecaptcha()
+    if (recaptcha === undefined) {
+      return
+    }
+
     const promise = toast.promise(
-      async () => {
-        const recaptcha = await execRecaptcha()
-        return apiRequest('POST', `/api/challenge/${challengeId}/create`, {
-          recaptcha,
-        })
-      },
+      apiRequest('POST', `/api/challenge/${challengeId}/create`, {
+        recaptcha,
+      }),
       {
         pending: 'Starting instance',
-        success: 'Instance started',
+        success: 'Instance starting',
         error: {
           render({ data }) {
             return data?.message ?? 'Could not start instance'
@@ -55,25 +90,27 @@ const Challenge = () => {
     )
     mutate(promise, {
       optimisticData: produce(data, (draft) => {
-        draft.status = 'Pending'
+        draft.status = 'Starting'
       }),
       rollbackOnError: true,
-      revalidate: false,
+      revalidate: true,
       populateCache: true,
-    }).catch(() => undefined)
+    }).catch(() => {})
   }
 
   const handleStop = async () => {
+    const recaptcha = await await execRecaptcha()
+    if (recaptcha === undefined) {
+      return
+    }
+
     const promise = toast.promise(
-      async () => {
-        const recaptcha = await execRecaptcha()
-        return apiRequest('POST', `/api/challenge/${challengeId}/delete`, {
-          recaptcha,
-        })
-      },
+      apiRequest('POST', `/api/challenge/${challengeId}/delete`, {
+        recaptcha,
+      }),
       {
         pending: 'Stopping instance',
-        success: 'Instance stopped',
+        success: 'Instance stopping',
         error: {
           render({ data }) {
             return data?.message ?? 'Could not stop instance'
@@ -83,14 +120,14 @@ const Challenge = () => {
     )
     mutate(promise, {
       optimisticData: produce(data, (draft) => {
-        draft.status = 'Terminating'
+        draft.status = 'Stopping'
         delete draft.server
         delete draft.time
       }),
       rollbackOnError: true,
       revalidate: true,
-      populateCache: false,
-    }).catch(() => undefined)
+      populateCache: true,
+    }).catch(() => {})
   }
 
   if (error?.status === 401) {
@@ -146,12 +183,12 @@ const Challenge = () => {
           Start
         </Button>
       )}
-      {data.status === 'Running' && (
+      {(data.status === 'Running' || data.status === 'Starting') && (
         <Button className="btn-stop" onClick={handleStop}>
           Stop
         </Button>
       )}
-      {(data.status === 'Pending' || data.status === 'Terminating') && (
+      {(data.status === 'Starting' || data.status === 'Stopping') && (
         <Spinner
           className={classnames(
             'status-spinner',

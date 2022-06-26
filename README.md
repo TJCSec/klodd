@@ -5,23 +5,22 @@ CTF challenge per-team instance runner
 
 ## high priority
 - [x] timeout
-- [ ] better config method (yaml file?)
+- [x] better config method (yaml file?)
 - [x] delete all instances when resource is modified/deleted
 - [x] more descriptive errors (better than success: true/false)
-- [ ] ~~frontend (use swr?)~~ refactor frontend
 - [x] recaptcha
 - [x] docker
 - [x] test in cluster (config.kubeConfig = 'cluster')
 - [ ] better logging
-- [ ] github actions build docker
+- [x] github actions build docker
 
 ## medium priority
 - [ ] design better api (response types maybe)
 - [ ] support middleware
 - [ ] undo spaghetti
-- [ ] babel, ~~prettier, eslint~~ maybe
+- [ ] babel for server maybe
 - [ ] testing lmao (jest probably)
-- [ ] handle not ready status
+- [x] handle not ready status
 
 ## low priority
 - [ ] typescript?
