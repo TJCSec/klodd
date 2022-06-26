@@ -157,58 +157,37 @@ export const makeServiceFactory =
     },
   })
 
-export const makeIngressRoute = ({
-  host,
-  entryPoint,
-  serviceName,
-  servicePort,
-}) => ({
-  apiVersion: 'traefik.containo.us/v1alpha1',
-  kind: 'IngressRoute',
-  metadata: { name: 'ingress' },
-  spec: {
-    entryPoints: [entryPoint],
-    routes: [
-      {
-        kind: 'Rule',
-        match: `Host(\`${host}\`)`,
-        services: [
-          {
-            kind: 'Service',
-            name: serviceName,
-            port: servicePort,
-          },
-        ],
-      },
-    ],
-    tls: {},
-  },
-})
+export const makeIngressRouteFactory =
+  (kind) =>
+  ({ host, entryPoint, serviceName, servicePort, numMiddlewares }) => ({
+    apiVersion: 'traefik.containo.us/v1alpha1',
+    kind: kind === 'http' ? 'IngressRoute' : 'IngressRouteTCP',
+    metadata: { name: 'ingress' },
+    spec: {
+      entryPoints: [entryPoint],
+      routes: [
+        {
+          kind: 'Rule',
+          match: `${kind === 'http' ? 'Host' : 'HostSNI'}(\`${host}\`)`,
+          middlewares: Array(numMiddlewares)
+            .fill()
+            .map((_, idx) => ({ name: `middleware-${idx}` })),
+          services: [
+            {
+              kind: 'Service',
+              name: serviceName,
+              port: servicePort,
+            },
+          ],
+        },
+      ],
+      tls: {},
+    },
+  })
 
-export const makeIngressRouteTcp = ({
-  host,
-  entryPoint,
-  serviceName,
-  servicePort,
-}) => ({
+export const makeMiddlewareFactory = (kind) => (middleware, idx) => ({
   apiVersion: 'traefik.containo.us/v1alpha1',
-  kind: 'IngressRouteTCP',
-  metadata: { name: 'ingress' },
-  spec: {
-    entryPoints: [entryPoint],
-    routes: [
-      {
-        kind: 'Rule',
-        match: `HostSNI(\`${host}\`)`,
-        services: [
-          {
-            kind: 'Service',
-            name: serviceName,
-            port: servicePort,
-          },
-        ],
-      },
-    ],
-    tls: {},
-  },
+  kind: kind === 'http' ? 'Middleware' : 'MiddlewareTCP',
+  metadata: { name: `middleware-${idx}` },
+  spec: middleware,
 })

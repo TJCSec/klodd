@@ -16,7 +16,7 @@ rules:
     resources: [networkpolicies]
     verbs: [create, delete]
   - apiGroups: [traefik.containo.us]
-    resources: [ingressroutes, ingressroutetcps]
+    resources: [ingressroutes, ingressroutetcps, middlewares, middlewaretcps]
     verbs: [create, delete]
   - apiGroups: [klodd.tjcsec.club]
     resources: [challenges]

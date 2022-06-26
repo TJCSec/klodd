@@ -98,5 +98,10 @@ spec:
                         Port is the port that will be exposed. It must be a
                         valid port number (1-65535, inclusive).
                   required: [kind, pod, port]
+                middlewares:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
               required: [name, timeout, pods, expose]
           required: [spec]
