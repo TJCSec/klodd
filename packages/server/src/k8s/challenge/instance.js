@@ -128,8 +128,8 @@ export const createInstance = async (challengeId, teamId) => {
     await Promise.all(
       challengeConfig.pods
         .map(makeDeployment)
-        .map((pod) =>
-          appsV1Api.createNamespacedDeployment(namespace.metadata.name, pod)
+        .map((deployment) =>
+          appsV1Api.createNamespacedDeployment(namespace.metadata.name, deployment)
         )
     )
   } catch (err) {
@@ -155,21 +155,19 @@ export const createInstance = async (challengeId, teamId) => {
     challengeConfig.expose.kind === 'http' ? 'middlewares' : 'middlewaretcps'
 
   try {
-    if (challengeConfig.middlewares?.length > 0) {
-      await Promise.all(
-        challengeConfig.middlewares
-          .map(makeMiddleware)
-          .map((mi) =>
-            customApi.createNamespacedCustomObject(
-              'traefik.containo.us',
-              'v1alpha1',
-              namespace.metadata.name,
-              middlewarePlural,
-              mi
-            )
+    await Promise.all(
+      challengeConfig.middlewares
+        .map(makeMiddleware)
+        .map((middleware) =>
+          customApi.createNamespacedCustomObject(
+            'traefik.containo.us',
+            'v1alpha1',
+            namespace.metadata.name,
+            middlewarePlural,
+            middleware
           )
-      )
-    }
+        )
+    )
   } catch (err) {
     throw new InstanceCreationError('Could not create middlewares', err)
   }

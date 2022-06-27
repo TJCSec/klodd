@@ -99,6 +99,8 @@ spec:
                   required: [kind, pod, port]
                 middlewares:
                   type: array
+                  description: >-
+                    Middlewares defines additional middlewares to be added to each instance.
                   items:
                     type: object
                     x-kubernetes-preserve-unknown-fields: true

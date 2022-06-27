@@ -51,18 +51,14 @@ spec:
       labels:
         app.kubernetes.io/name: klodd
     spec:
-      serviceAccountName: klodd
-      securityContext:
-        runAsUser: 65534
-        runAsGroup: 65534
+      serviceAccountName: klodd # (3)
       volumes:
         - name: config
           secret:
             secretName: klodd
       containers:
         - name: klodd
-          image: ghcr.io/tjcsec/klodd:master
-          imagePullPolicy: Always
+          image: ghcr.io/tjcsec/klodd:master # (4)
           volumeMounts:
             - name: config
               mountPath: /app/config/
@@ -70,10 +66,6 @@ spec:
           ports:
             - name: public
               containerPort: 5000
-          resources:
-            limits:
-              memory: 1000Mi
-              cpu: 1000m
 ---
 apiVersion: v1
 kind: Service
@@ -107,8 +99,12 @@ spec:
             pathType: ImplementationSpecific
 ```
 
-1. You must first apply the Klodd [ClusterRole](https://raw.githubusercontent.com/TJCSec/klodd/master/manifests/klodd-rbac.yaml)—instructions for how to do this are provided [here](../install-guide/installation.md).
-2. The decoded contents are provided below.
+1. You must first apply the Klodd [ClusterRole](https://raw.githubusercontent.com/TJCSec/klodd/master/manifests/klodd-rbac.yaml)—instructions for how to do this are provided [here](../install-guide/installation.md#crd-and-clusterrole).
+2. The decoded contents are provided [below](#configyaml).
+3. This allows Klodd to access the cluster using the ServiceAccount with ClusterRole created above.
+4. Using a more specific tag or SHA256 digest is recommended.
+
+## config.yaml
 
 Here are the contents of `config.yaml`:
 

@@ -9,13 +9,34 @@ markdown_extensions:
 - admonition
 - pymdownx.details
 - pymdownx.superfences
+- pymdownx.highlight
+- pymdownx.inlinehilite
+- pymdownx.snippets
+- pymdownx.tabbed:
+    alternate_style: true
 - toc:
     permalink: True
+- footnotes
 theme:
   name: material
   language: en
   features:
   - content.code.annotate
+  palette:
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    primary: indigo
+    accent: indigo
+    toggle:
+      icon: fontawesome/solid/sun
+      name: Switch to dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: indigo
+    accent: indigo
+    toggle:
+      icon: fontawesome/solid/moon
+      name: Switch to light mode
 
 nav:
 - "Home": index.md
