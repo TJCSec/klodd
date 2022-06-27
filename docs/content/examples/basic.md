@@ -83,7 +83,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    lmao: bruh
+    app.kubernetes.io/name: klodd
   ports:
     - name: public
       port: 5000
