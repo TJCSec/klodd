@@ -1,0 +1,31 @@
+site_name: Klodd
+site_url: https://tjcsec.github.io/klodd/
+repo_url: https://github.com/TJCSec/klodd/
+edit_uri: blob/master/docs/content/
+site_description: CTF challenge per-team instance runner
+site_author: TJCSC
+docs_dir: content
+markdown_extensions:
+- admonition
+- pymdownx.details
+- pymdownx.superfences
+- toc:
+    permalink: True
+theme:
+  name: material
+  language: en
+  features:
+  - content.code.annotate
+
+nav:
+- "Home": index.md
+- "How To Use Klodd": how-to.md
+- "Installation Guide":
+  - "Prerequisites": install-guide/prerequisites.md
+  - "Installation": install-guide/installation.md
+  - "Configuration": install-guide/configuration.md
+  - "Challenges": install-guide/challenges.md
+- "Examples":
+  - "Basic Deployment": examples/basic.md
+  - "Challenges": examples/challenges.md
+  - "Terraform": examples/terraform.md

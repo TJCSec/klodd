@@ -4,6 +4,19 @@ on:
     branches: [master]
 
 jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - name: Install mkdocs-material
+        run: pip install mkdocs-material
+      - name: Publish docs
+        run: mkdocs gh-deploy --config-file docs/mkdocs.yml --force
   docker-build:
     runs-on: ubuntu-latest
 

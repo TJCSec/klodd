@@ -66,9 +66,9 @@ export const useChallenge = (challengeId) =>
       if (data === undefined) {
         return 0
       }
-      if (data.status === 'Pending') {
+      if (data.status === 'Starting') {
         return 1000
-      } else if (data.status === 'Terminating') {
+      } else if (data.status === 'Stopping') {
         return 2000
       } else if (data.status === 'Running') {
         return data.time.remaining < 5000 ? 1000 : 5000

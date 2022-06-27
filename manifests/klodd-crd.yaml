@@ -74,8 +74,7 @@ spec:
                       spec:
                         type: object
                         description: >-
-                          Spec is the PodSpec that will be used to create the pod. Note that not all
-                          PodSpec properties can be configured.
+                          Spec is the PodSpec that will be used to create the pod.
                         x-kubernetes-preserve-unknown-fields: true
                     required: [name, spec]
                 expose:
