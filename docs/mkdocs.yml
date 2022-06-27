@@ -1,4 +1,8 @@
 site_name: Klodd
+site_url: https://tjcsec.github.io/klodd/
+repo_url: https://github.com/TJCSec/klodd/
+site_description: asdf
+site_author: TJCSC
 docs_dir: content
 markdown_extensions:
 - admonition
