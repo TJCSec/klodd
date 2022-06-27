@@ -16,7 +16,7 @@ jobs:
       - name: Install mkdocs-material
         run: pip install mkdocs-material
       - name: Publish docs
-        run: mkdocs gh-deploy --force
+        run: mkdocs gh-deploy --config-file docs/mkdocs.yml --force
   docker-build:
     runs-on: ubuntu-latest
 
