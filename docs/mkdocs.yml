@@ -1,0 +1,26 @@
+site_name: Klodd
+docs_dir: content
+markdown_extensions:
+- admonition
+- pymdownx.details
+- pymdownx.superfences
+- toc:
+    permalink: True
+theme:
+  name: material
+  language: en
+  features:
+  - content.code.annotate
+
+nav:
+- "Home": index.md
+- "How To Use Klodd": how-to.md
+- "Installation Guide":
+  - "Prerequisites": install-guide/prerequisites.md
+  - "Installation": install-guide/installation.md
+  - "Configuration": install-guide/configuration.md
+  - "Challenges": install-guide/challenges.md
+- "Examples":
+  - "Basic Deployment": examples/basic.md
+  - "Challenges": examples/challenges.md
+  - "Terraform": examples/terraform.md
