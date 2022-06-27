@@ -8,11 +8,6 @@ const schema = {
     },
     listen: {
       type: 'object',
-      properties: {
-        host: { type: 'string' },
-        port: { type: 'integer' },
-      },
-      required: ['host', 'port'],
     },
     publicUrl: { type: 'string' },
     rctfUrl: { type: 'string' },
