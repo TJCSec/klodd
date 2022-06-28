@@ -30,6 +30,12 @@ spec:
     kind: http # (7)
     pod: app # (8)
     port: 80
+  middlewares: # (9)
+    - contentType:
+        autoDetect: false
+    - rateLimit:
+        average: 5
+        burst: 10
 ```
 
 1. The name of the resource is also used in the challenge URL. For example, the page for this challenge is accessible at `/challenge/test`.
@@ -40,3 +46,4 @@ spec:
 6. This is a normal [PodSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#podspec-v1-core).
 7. This must be either `http` or `tcp`.
 8. This is the name of the Service that will be exposed, and it must match the name given in `spec.pods`.
+9. Each object in this array will be turned into a [Middleware](https://doc.traefik.io/traefik/routing/providers/kubernetes-crd/#kind-middleware) or [MiddlewareTCP](https://doc.traefik.io/traefik/routing/providers/kubernetes-crd/#kind-middlewaretcp) if `expose.kind` is `http` or `tcp`, respectively. Refer to the Traefik documentation for instructions on configuring these.

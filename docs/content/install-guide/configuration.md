@@ -1,6 +1,8 @@
 # Configuration
 
-Klodd is configured using YAML files. Klodd will load all files with `.yaml` or `.yml` extensions in the configuration directory in order by filename, then merge all of them together. By default, the configuration directory is `/app/config/`, but this may be changed using the environment variable `KLODD_CONFIG`. All configuration options are required, though some have sensible defaults.
+Klodd is configured using YAML[^1] files. Klodd will load all files with `.yaml` or `.yml` extensions in the configuration directory in order by filename, then merge all of them together. By default, the configuration directory is `/app/config/`, but this may be changed using the environment variable `KLODD_CONFIG`. All configuration options are required, though some have sensible defaults.
+
+[^1]: Since YAML is a superset of JSON, including JSON or using entirely JSON in your `.yaml`/`.yml` files is valid and allowed.
 
 ## Reference
 

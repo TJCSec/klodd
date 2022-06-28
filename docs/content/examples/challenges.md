@@ -34,6 +34,12 @@ spec:
     kind: http
     pod: app
     port: 80
+  middlewares:
+    - contentType:
+        autoDetect: false
+    - rateLimit:
+        average: 5
+        burst: 10
 ```
 
 ## Fruit Store

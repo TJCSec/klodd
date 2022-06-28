@@ -11,8 +11,8 @@ import {
   getNamespaceName,
   makeCommonLabels,
   makeDeploymentFactory,
-  makeIngressRoute,
-  makeIngressRouteTcp,
+  makeIngressRouteFactory,
+  makeMiddlewareFactory,
   makeNamespaceManifest,
   makeNetworkPolicies,
   makeServiceFactory,
@@ -126,12 +126,11 @@ export const createInstance = async (challengeId, teamId) => {
 
   try {
     await Promise.all(
-      challengeConfig.pods.map((pod) =>
-        appsV1Api.createNamespacedDeployment(
-          namespace.metadata.name,
-          makeDeployment(pod)
+      challengeConfig.pods
+        .map(makeDeployment)
+        .map((deployment) =>
+          appsV1Api.createNamespacedDeployment(namespace.metadata.name, deployment)
         )
-      )
     )
   } catch (err) {
     throw new InstanceCreationError('Could not create deployments', err)
@@ -141,48 +140,62 @@ export const createInstance = async (challengeId, teamId) => {
 
   try {
     await Promise.all(
-      challengeConfig.pods.map((pod) =>
-        coreV1Api.createNamespacedService(
-          namespace.metadata.name,
-          makeService(pod)
+      challengeConfig.pods
+        .map(makeService)
+        .map((service) =>
+          coreV1Api.createNamespacedService(namespace.metadata.name, service)
         )
-      )
     )
   } catch (err) {
     throw new InstanceCreationError('Could not create services', err)
   }
 
+  const makeMiddleware = makeMiddlewareFactory(challengeConfig.expose.kind)
+  const middlewarePlural =
+    challengeConfig.expose.kind === 'http' ? 'middlewares' : 'middlewaretcps'
+
   try {
-    if (challengeConfig.expose.kind === 'http') {
-      const ingressRoute = makeIngressRoute({
-        host: getHost(challengeId, instanceId),
-        entryPoint: config.traefik.httpEntrypoint,
-        serviceName: challengeConfig.expose.pod,
-        servicePort: challengeConfig.expose.port,
-      })
-      await customApi.createNamespacedCustomObject(
-        'traefik.containo.us',
-        'v1alpha1',
-        namespace.metadata.name,
-        'ingressroutes',
-        ingressRoute
-      )
-    } else {
-      // challengeConfig.expose.kind === 'tcp'
-      const ingressRouteTcp = makeIngressRouteTcp({
-        host: getHost(challengeId, instanceId),
-        entryPoint: config.traefik.tcpEntrypoint,
-        serviceName: challengeConfig.expose.pod,
-        servicePort: challengeConfig.expose.port,
-      })
-      await customApi.createNamespacedCustomObject(
-        'traefik.containo.us',
-        'v1alpha1',
-        namespace.metadata.name,
-        'ingressroutetcps',
-        ingressRouteTcp
-      )
-    }
+    await Promise.all(
+      challengeConfig.middlewares
+        .map(makeMiddleware)
+        .map((middleware) =>
+          customApi.createNamespacedCustomObject(
+            'traefik.containo.us',
+            'v1alpha1',
+            namespace.metadata.name,
+            middlewarePlural,
+            middleware
+          )
+        )
+    )
+  } catch (err) {
+    throw new InstanceCreationError('Could not create middlewares', err)
+  }
+
+  const makeIngress = makeIngressRouteFactory(challengeConfig.expose.kind)
+  const ingressPlural =
+    challengeConfig.expose.kind === 'http'
+      ? 'ingressroutes'
+      : 'ingressroutetcps'
+
+  try {
+    const ingressRoute = makeIngress({
+      host: getHost(challengeId, instanceId),
+      entryPoint:
+        challengeConfig.expose.kind === 'http'
+          ? config.traefik.httpEntrypoint
+          : config.traefik.tcpEntrypoint,
+      serviceName: challengeConfig.expose.pod,
+      servicePort: challengeConfig.expose.port,
+      numMiddlewares: challengeConfig.middlewares?.length ?? 0,
+    })
+    await customApi.createNamespacedCustomObject(
+      'traefik.containo.us',
+      'v1alpha1',
+      namespace.metadata.name,
+      ingressPlural,
+      ingressRoute
+    )
   } catch (err) {
     throw new InstanceCreationError('Could not create ingress', err)
   }
