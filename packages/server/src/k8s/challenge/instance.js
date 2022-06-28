@@ -155,19 +155,21 @@ export const createInstance = async (challengeId, teamId) => {
     challengeConfig.expose.kind === 'http' ? 'middlewares' : 'middlewaretcps'
 
   try {
-    await Promise.all(
-      challengeConfig.middlewares
-        .map(makeMiddleware)
-        .map((middleware) =>
-          customApi.createNamespacedCustomObject(
-            'traefik.containo.us',
-            'v1alpha1',
-            namespace.metadata.name,
-            middlewarePlural,
-            middleware
+    if (challengeConfig.middlewares?.length > 0) {
+      await Promise.all(
+        challengeConfig.middlewares
+          .map(makeMiddleware)
+          .map((middleware) =>
+            customApi.createNamespacedCustomObject(
+              'traefik.containo.us',
+              'v1alpha1',
+              namespace.metadata.name,
+              middlewarePlural,
+              middleware
+            )
           )
-        )
-    )
+      )
+    }
   } catch (err) {
     throw new InstanceCreationError('Could not create middlewares', err)
   }
