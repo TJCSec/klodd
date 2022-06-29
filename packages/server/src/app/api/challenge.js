@@ -96,8 +96,7 @@ const routes = async (fastify, _options) => {
       const teamId = req.user.sub
 
       try {
-        const instance = await createInstance(challengeId, teamId)
-        return instance
+        return createInstance(challengeId, teamId, req.log)
       } catch (err) {
         req.log.error(err)
         if (err instanceof InstanceCreationError) {
@@ -137,7 +136,7 @@ const routes = async (fastify, _options) => {
       const { challengeId } = req.params
       const teamId = req.user.sub
       try {
-        return deleteInstance(challengeId, teamId)
+        return deleteInstance(challengeId, teamId, req.log)
       } catch (err) {
         req.log.error(err)
         return res.internalServerError('Unknown error deleting instance')

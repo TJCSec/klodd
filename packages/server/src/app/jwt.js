@@ -11,6 +11,7 @@ const auth = fp(async (fastify, _options) => {
   fastify.decorate('authenticate', async (req, res) => {
     try {
       await req.jwtVerify()
+      req.log.info({ user: req.user.sub }, 'User authenticated')
     } catch (err) {
       res.unauthorized('Invalid authorization token')
     }
