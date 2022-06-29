@@ -1,17 +1,21 @@
-import { coreV1Api, customApi, watch } from '../api.js'
-import { LABEL_CHALLENGE } from '../const.js'
-import { deleteNamespace } from '../util.js'
+import { coreV1Api, customApi, watch } from './api.js'
+import { LABEL_CHALLENGE } from './const.js'
+import { deleteNamespace } from './util.js'
+
+import fastify from '../app/fastify.js'
 
 const challengeResources = new Map()
 
 const saveApiObj = (apiObj) => {
   const challengeId = apiObj.metadata.name
   challengeResources.set(challengeId, apiObj.spec)
+  fastify.log.debug({ spec: apiObj.spec }, 'saved challenge %s', challengeId)
 }
 
 const deleteApiObj = (apiObj) => {
   const challengeId = apiObj.metadata.name
   challengeResources.delete(challengeId)
+  fastify.log.debug('deleted challenge %s', challengeId)
 }
 
 const stopAll = async (challengeId) => {
@@ -36,7 +40,13 @@ const subscribeToCluster = async () => {
       'challenges'
     )
   ).body
-  await Promise.all(challengeList.items.map(saveApiObj))
+  challengeList.items.forEach(saveApiObj)
+
+  fastify.log.debug(
+    'loaded %d challenges, starting watch at %s',
+    challengeList.items.length,
+    challengeList.metadata.resourceVersion
+  )
 
   return watch.watch(
     '/apis/klodd.tjcsec.club/v1/challenges',

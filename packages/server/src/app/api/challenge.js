@@ -1,9 +1,9 @@
-import challengeResources from '../../k8s/challenge/resource.js'
+import challengeResources from '../../k8s/resource.js'
 import {
   getInstance,
   createInstance,
   deleteInstance,
-} from '../../k8s/challenge/instance.js'
+} from '../../k8s/instance.js'
 import { InstanceCreationError } from '../../error.js'
 
 const routes = async (fastify, _options) => {

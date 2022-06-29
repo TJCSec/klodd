@@ -2,32 +2,14 @@ import path from 'path'
 import { promises as fs } from 'fs'
 import { fileURLToPath } from 'url'
 
-import Fastify from 'fastify'
 import sensible from '@fastify/sensible'
 import fastifyStatic from '@fastify/static'
 
+import fastify from './fastify.js'
 import config from '../config.js'
 import api from './api/index.js'
 import jwt from './jwt.js'
 import recaptcha from './recaptcha.js'
-
-const production = process.env.NODE_ENV === 'production'
-
-const fastify = Fastify({
-  logger: {
-    level: production ? 'info' : 'debug',
-    transport: production
-      ? undefined
-      : {
-          target: 'pino-pretty',
-          options: {
-            translateTime: 'HH:MM:ss Z',
-            ignore: 'pid,hostname',
-          },
-        },
-  },
-  ignoreTrailingSlash: true,
-})
 
 fastify.register(sensible)
 fastify.register(jwt)

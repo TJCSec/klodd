@@ -1,10 +1,10 @@
 import k8s from '@kubernetes/client-node'
 
-import config from '../../config.js'
-import { InstanceCreationError } from '../../error.js'
-import { appsV1Api, coreV1Api, customApi, networkingV1Api } from '../api.js'
-import { LABEL_INSTANCE } from '../const.js'
-import { deleteNamespace, getDeployment, getNamespace } from '../util.js'
+import config from '../config.js'
+import { InstanceCreationError } from '../error.js'
+import { appsV1Api, coreV1Api, customApi, networkingV1Api } from './api.js'
+import { LABEL_INSTANCE } from './const.js'
+import { deleteNamespace, getDeployment, getNamespace } from './util.js'
 import {
   getHost,
   getId,
@@ -90,8 +90,9 @@ export const createInstance = async (challengeId, teamId, log) => {
   })
 
   try {
-    await coreV1Api.createNamespace(namespaceManifest)
-    log.debug({ namespace: namespaceManifest }, 'Created Namespace')
+    await coreV1Api.createNamespace(namespaceManifest).then(({ body }) => {
+      log.debug({ body }, 'created Namespace')
+    })
   } catch (err) {
     if (err instanceof k8s.HttpError && err.statusCode === 409) {
       throw new InstanceCreationError('Instance is already running', err)
@@ -111,8 +112,8 @@ export const createInstance = async (challengeId, teamId, log) => {
       networkPolicies.map((policy) =>
         networkingV1Api
           .createNamespacedNetworkPolicy(namespace, policy)
-          .then(() => {
-            log.debug({ namespace, policy }, 'Created NetworkPolicy')
+          .then(({ body }) => {
+            log.debug({ namespace, body }, 'created NetworkPolicy')
           })
       )
     )
@@ -125,9 +126,11 @@ export const createInstance = async (challengeId, teamId, log) => {
   try {
     await Promise.all(
       challengeConfig.pods.map(makeDeployment).map((deployment) =>
-        appsV1Api.createNamespacedDeployment(namespace, deployment).then(() => {
-          log.debug({ namespace, deployment }, 'Created Deployment')
-        })
+        appsV1Api
+          .createNamespacedDeployment(namespace, deployment)
+          .then(({ body }) => {
+            log.debug({ namespace, body }, 'created Deployment')
+          })
       )
     )
   } catch (err) {
@@ -139,9 +142,11 @@ export const createInstance = async (challengeId, teamId, log) => {
   try {
     await Promise.all(
       challengeConfig.pods.map(makeService).map((service) =>
-        coreV1Api.createNamespacedService(namespace, service).then(() => {
-          log.debug({ namespace, service }, 'Created Service')
-        })
+        coreV1Api
+          .createNamespacedService(namespace, service)
+          .then(({ body }) => {
+            log.debug({ namespace, body }, 'created Service')
+          })
       )
     )
   } catch (err) {
@@ -164,8 +169,8 @@ export const createInstance = async (challengeId, teamId, log) => {
               middlewarePlural,
               middleware
             )
-            .then(() => {
-              log.debug({ namespace, middleware }, 'Created Middleware')
+            .then(({ body }) => {
+              log.debug({ namespace, body }, 'created Middleware')
             })
         )
       )
@@ -199,8 +204,8 @@ export const createInstance = async (challengeId, teamId, log) => {
         ingressPlural,
         ingressRoute
       )
-      .then(() => {
-        log.debug({ namespace, ingressRoute }, 'Created IngressRoute')
+      .then(({ body }) => {
+        log.debug({ namespace, body }, 'created IngressRoute')
       })
   } catch (err) {
     throw new InstanceCreationError('Could not create ingress', err)
@@ -218,7 +223,7 @@ export const deleteInstance = async (challengeId, teamId, log) => {
   const challengeConfig = challengeResources.get(challengeId)
   const namespace = getNamespaceName(challengeId, teamId)
   await deleteNamespace(namespace)
-  log.debug({ namespace }, 'Deleted Namespace')
+  log.debug({ namespace }, 'deleted Namespace')
   return {
     name: challengeConfig.name,
     status: 'Stopping',

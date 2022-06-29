@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import config from '../../config.js'
+import config from '../config.js'
 import {
   ANNOTATION_TTL,
   LABEL_CHALLENGE,
@@ -10,7 +10,7 @@ import {
   LABEL_MANAGED_BY_VALUE,
   LABEL_POD,
   LABEL_TEAM,
-} from '../const.js'
+} from './const.js'
 
 export const getId = () => crypto.randomBytes(8).toString('hex')
 export const getHost = (challengeId, instanceId) =>
