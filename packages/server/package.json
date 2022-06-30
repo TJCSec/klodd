@@ -16,6 +16,7 @@
     "fastify": "^4.0.3",
     "fastify-plugin": "^3.0.1",
     "got": "^12.1.0",
+    "hyperid": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
     "yaml": "^2.1.1"
   },

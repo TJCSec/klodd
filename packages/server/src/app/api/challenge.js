@@ -1,9 +1,9 @@
-import challengeResources from '../../k8s/challenge/resource.js'
+import challengeResources from '../../k8s/resource.js'
 import {
   getInstance,
   createInstance,
   deleteInstance,
-} from '../../k8s/challenge/instance.js'
+} from '../../k8s/instance.js'
 import { InstanceCreationError } from '../../error.js'
 
 const routes = async (fastify, _options) => {
@@ -96,15 +96,16 @@ const routes = async (fastify, _options) => {
       const teamId = req.user.sub
 
       try {
-        const instance = await createInstance(challengeId, teamId)
+        const instance = await createInstance(challengeId, teamId, req.log)
+        req.log.info('instance created')
         return instance
       } catch (err) {
-        req.log.error(err)
         if (err instanceof InstanceCreationError) {
+          req.log.debug(err)
           req.log.debug(err.cause)
           return res.conflict(err.message)
         }
-        return res.internalServerError('Unknown error creating instance')
+        throw err
       }
     },
   })
@@ -133,15 +134,12 @@ const routes = async (fastify, _options) => {
       },
     },
     preHandler: [fastify.recaptcha],
-    handler: async (req, res) => {
+    handler: async (req, _res) => {
       const { challengeId } = req.params
       const teamId = req.user.sub
-      try {
-        return deleteInstance(challengeId, teamId)
-      } catch (err) {
-        req.log.error(err)
-        return res.internalServerError('Unknown error deleting instance')
-      }
+      const instance = await deleteInstance(challengeId, teamId, req.log)
+      req.log.info('instance deleted')
+      return instance
     },
   })
 }

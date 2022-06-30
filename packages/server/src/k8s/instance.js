@@ -1,10 +1,10 @@
 import k8s from '@kubernetes/client-node'
 
-import config from '../../config.js'
-import { InstanceCreationError } from '../../error.js'
-import { appsV1Api, coreV1Api, customApi, networkingV1Api } from '../api.js'
-import { LABEL_INSTANCE } from '../const.js'
-import { deleteNamespace, getDeployment, getNamespace } from '../util.js'
+import config from '../config.js'
+import { InstanceCreationError } from '../error.js'
+import { appsV1Api, coreV1Api, customApi, networkingV1Api } from './api.js'
+import { LABEL_INSTANCE } from './const.js'
+import { deleteNamespace, getDeployment, getNamespace } from './util.js'
 import {
   getHost,
   getId,
@@ -35,7 +35,6 @@ export const getInstance = async (challengeId, teamId) => {
   const challengeConfig = challengeResources.get(challengeId)
   const instance = {
     name: challengeConfig.name,
-    status: '',
     timeout: challengeConfig.timeout,
   }
 
@@ -59,9 +58,8 @@ export const getInstance = async (challengeId, teamId) => {
     return instance
   }
 
-  const status =
+  instance.status =
     (deployment.status.availableReplicas ?? 0) > 0 ? 'Running' : 'Starting'
-  instance.status = status
 
   const instanceId = namespace.metadata.labels[LABEL_INSTANCE]
   const { kind } = challengeConfig.expose
@@ -79,29 +77,29 @@ export const getInstance = async (challengeId, teamId) => {
   return instance
 }
 
-export const createInstance = async (challengeId, teamId) => {
+export const createInstance = async (challengeId, teamId, log) => {
   const challengeConfig = challengeResources.get(challengeId)
 
   const instanceId = getId()
   const commonLabels = makeCommonLabels({ challengeId, teamId, instanceId })
-  const namespaceName = getNamespaceName(challengeId, teamId)
+  const namespace = getNamespaceName(challengeId, teamId)
   const namespaceManifest = makeNamespaceManifest({
-    name: namespaceName,
+    name: namespace,
     labels: commonLabels,
     timeout: challengeConfig.timeout,
   })
 
-  let apiResponse
   try {
-    apiResponse = await coreV1Api.createNamespace(namespaceManifest)
+    await coreV1Api.createNamespace(namespaceManifest).then(({ body }) => {
+      log.debug({ body }, 'created Namespace')
+    })
   } catch (err) {
     if (err instanceof k8s.HttpError && err.statusCode === 409) {
       throw new InstanceCreationError('Instance is already running', err)
     }
     throw err
   }
-  const namespace = apiResponse.body
-  scheduleDeletion(namespace.metadata.name, challengeConfig.timeout)
+  scheduleDeletion(namespace, challengeConfig.timeout)
 
   const networkPolicies = makeNetworkPolicies({
     commonLabels,
@@ -112,10 +110,11 @@ export const createInstance = async (challengeId, teamId) => {
   try {
     await Promise.all(
       networkPolicies.map((policy) =>
-        networkingV1Api.createNamespacedNetworkPolicy(
-          namespace.metadata.name,
-          policy
-        )
+        networkingV1Api
+          .createNamespacedNetworkPolicy(namespace, policy)
+          .then(({ body }) => {
+            log.debug({ namespace, body }, 'created NetworkPolicy')
+          })
       )
     )
   } catch (err) {
@@ -126,11 +125,13 @@ export const createInstance = async (challengeId, teamId) => {
 
   try {
     await Promise.all(
-      challengeConfig.pods
-        .map(makeDeployment)
-        .map((deployment) =>
-          appsV1Api.createNamespacedDeployment(namespace.metadata.name, deployment)
-        )
+      challengeConfig.pods.map(makeDeployment).map((deployment) =>
+        appsV1Api
+          .createNamespacedDeployment(namespace, deployment)
+          .then(({ body }) => {
+            log.debug({ namespace, body }, 'created Deployment')
+          })
+      )
     )
   } catch (err) {
     throw new InstanceCreationError('Could not create deployments', err)
@@ -140,11 +141,13 @@ export const createInstance = async (challengeId, teamId) => {
 
   try {
     await Promise.all(
-      challengeConfig.pods
-        .map(makeService)
-        .map((service) =>
-          coreV1Api.createNamespacedService(namespace.metadata.name, service)
-        )
+      challengeConfig.pods.map(makeService).map((service) =>
+        coreV1Api
+          .createNamespacedService(namespace, service)
+          .then(({ body }) => {
+            log.debug({ namespace, body }, 'created Service')
+          })
+      )
     )
   } catch (err) {
     throw new InstanceCreationError('Could not create services', err)
@@ -157,17 +160,19 @@ export const createInstance = async (challengeId, teamId) => {
   try {
     if (challengeConfig.middlewares?.length > 0) {
       await Promise.all(
-        challengeConfig.middlewares
-          .map(makeMiddleware)
-          .map((middleware) =>
-            customApi.createNamespacedCustomObject(
+        challengeConfig.middlewares.map(makeMiddleware).map((middleware) =>
+          customApi
+            .createNamespacedCustomObject(
               'traefik.containo.us',
               'v1alpha1',
-              namespace.metadata.name,
+              namespace,
               middlewarePlural,
               middleware
             )
-          )
+            .then(({ body }) => {
+              log.debug({ namespace, body }, 'created Middleware')
+            })
+        )
       )
     }
   } catch (err) {
@@ -183,21 +188,21 @@ export const createInstance = async (challengeId, teamId) => {
   try {
     const ingressRoute = makeIngress({
       host: getHost(challengeId, instanceId),
-      entryPoint:
-        challengeConfig.expose.kind === 'http'
-          ? config.traefik.httpEntrypoint
-          : config.traefik.tcpEntrypoint,
       serviceName: challengeConfig.expose.pod,
       servicePort: challengeConfig.expose.port,
       numMiddlewares: challengeConfig.middlewares?.length ?? 0,
     })
-    await customApi.createNamespacedCustomObject(
-      'traefik.containo.us',
-      'v1alpha1',
-      namespace.metadata.name,
-      ingressPlural,
-      ingressRoute
-    )
+    await customApi
+      .createNamespacedCustomObject(
+        'traefik.containo.us',
+        'v1alpha1',
+        namespace,
+        ingressPlural,
+        ingressRoute
+      )
+      .then(({ body }) => {
+        log.debug({ namespace, body }, 'created IngressRoute')
+      })
   } catch (err) {
     throw new InstanceCreationError('Could not create ingress', err)
   }
@@ -210,9 +215,11 @@ export const createInstance = async (challengeId, teamId) => {
   }
 }
 
-export const deleteInstance = async (challengeId, teamId) => {
+export const deleteInstance = async (challengeId, teamId, log) => {
   const challengeConfig = challengeResources.get(challengeId)
-  await deleteNamespace(getNamespaceName(challengeId, teamId))
+  const namespace = getNamespaceName(challengeId, teamId)
+  await deleteNamespace(namespace)
+  log.debug({ namespace }, 'deleted Namespace')
   return {
     name: challengeConfig.name,
     status: 'Stopping',
