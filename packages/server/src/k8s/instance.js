@@ -188,10 +188,6 @@ export const createInstance = async (challengeId, teamId, log) => {
   try {
     const ingressRoute = makeIngress({
       host: getHost(challengeId, instanceId),
-      entryPoint:
-        challengeConfig.expose.kind === 'http'
-          ? config.traefik.httpEntrypoint
-          : config.traefik.tcpEntrypoint,
       serviceName: challengeConfig.expose.pod,
       servicePort: challengeConfig.expose.port,
       numMiddlewares: challengeConfig.middlewares?.length ?? 0,

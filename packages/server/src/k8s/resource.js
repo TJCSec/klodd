@@ -31,7 +31,9 @@ const stopAll = async (challengeId) => {
   )
   return Promise.all(
     body.items.map((namespace) => deleteNamespace(namespace.metadata.name))
-  )
+  ).then((deleted) => {
+    log.debug('stopped %d instances of %s', deleted.length, challengeId)
+  })
 }
 
 const subscribeToCluster = async () => {

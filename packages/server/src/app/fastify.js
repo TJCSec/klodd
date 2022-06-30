@@ -1,4 +1,5 @@
 import Fastify from 'fastify'
+import hyperid from 'hyperid'
 
 const production = process.env.NODE_ENV === 'production'
 
@@ -16,6 +17,7 @@ const fastify = Fastify({
         },
   },
   ignoreTrailingSlash: true,
+  genReqId: hyperid(),
 })
 
 export default fastify

@@ -159,12 +159,16 @@ export const makeServiceFactory =
 
 export const makeIngressRouteFactory =
   (kind) =>
-  ({ host, entryPoint, serviceName, servicePort, numMiddlewares }) => ({
+  ({ host, serviceName, servicePort, numMiddlewares }) => ({
     apiVersion: 'traefik.containo.us/v1alpha1',
     kind: kind === 'http' ? 'IngressRoute' : 'IngressRouteTCP',
     metadata: { name: 'ingress' },
     spec: {
-      entryPoints: [entryPoint],
+      entryPoints: [
+        kind === 'http'
+          ? config.traefik.httpEntrypoint
+          : config.traefik.tcpEntrypoint,
+      ],
       routes: [
         {
           kind: 'Rule',
