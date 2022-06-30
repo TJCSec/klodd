@@ -1,3 +1,5 @@
+import TcpServer from './tcpserver'
+
 const Server = ({ kind, host, port }) => {
   if (kind === 'http') {
     const url = `https://${host}`
@@ -7,8 +9,7 @@ const Server = ({ kind, host, port }) => {
       </a>
     )
   } else {
-    const address = `${host}:${port}`
-    return <code>{address}</code>
+    return <TcpServer host={host} port={port} />
   }
 }
 
