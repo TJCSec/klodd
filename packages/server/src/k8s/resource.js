@@ -4,18 +4,20 @@ import { deleteNamespace } from './util.js'
 
 import fastify from '../app/fastify.js'
 
+const log = fastify.log.child({ from: 'resource' })
+
 const challengeResources = new Map()
 
 const saveApiObj = (apiObj) => {
   const challengeId = apiObj.metadata.name
   challengeResources.set(challengeId, apiObj.spec)
-  fastify.log.debug({ spec: apiObj.spec }, 'saved challenge %s', challengeId)
+  log.debug({ spec: apiObj.spec }, 'saved challenge %s', challengeId)
 }
 
 const deleteApiObj = (apiObj) => {
   const challengeId = apiObj.metadata.name
   challengeResources.delete(challengeId)
-  fastify.log.debug('deleted challenge %s', challengeId)
+  log.debug('deleted challenge %s', challengeId)
 }
 
 const stopAll = async (challengeId) => {
@@ -42,7 +44,7 @@ const subscribeToCluster = async () => {
   ).body
   challengeList.items.forEach(saveApiObj)
 
-  fastify.log.debug(
+  log.debug(
     'loaded %d challenges, starting watch at %s',
     challengeList.items.length,
     challengeList.metadata.resourceVersion

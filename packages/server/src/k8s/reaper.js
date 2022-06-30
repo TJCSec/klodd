@@ -7,6 +7,8 @@ import {
 
 import fastify from '../app/fastify.js'
 
+const log = fastify.log.child({ from: 'reaper' })
+
 const scheduledDeletions = new Map()
 
 export const clearDeletion = (namespace) => {
@@ -14,7 +16,7 @@ export const clearDeletion = (namespace) => {
     clearTimeout(scheduledDeletions.get(namespace))
     scheduledDeletions.delete(namespace)
   }
-  fastify.log.debug({ namespace }, 'deletion cancelled')
+  log.debug({ namespace }, 'deletion cancelled')
 }
 
 export const scheduleDeletion = (namespace, timeout, update = false) => {
@@ -32,14 +34,14 @@ export const scheduleDeletion = (namespace, timeout, update = false) => {
       scheduledDeletions.delete(namespace)
     }, timeout)
   )
-  fastify.log.debug({ namespace, timeout }, 'deletion scheduled')
+  log.debug({ namespace, timeout }, 'deletion scheduled')
 }
 
 export const remainingTime = (creation, ttl) =>
   Math.max(0, creation + ttl - Date.now())
 
 export const reaper = async () => {
-  fastify.log.info('running reaper')
+  log.info('running reaper')
   const namespaces = await getNamespacesByLabel(
     `${LABEL_MANAGED_BY}=${LABEL_MANAGED_BY_VALUE}`
   )
