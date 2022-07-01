@@ -1,0 +1,79 @@
+.tcp {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+}
+
+.tcp-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.tcp-tabs > button {
+  padding: 0.5em 0.75em;
+  color: var(--color-text);
+  background-color: transparent;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  font-family: inherit;
+}
+
+.tcp-tabs > button:hover {
+  background-color: rgb(127 127 127 / 0.15);
+}
+
+.tcp-tabs > button.active {
+  font-weight: bold;
+}
+
+.tcp-tabs > button.active:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  background-color: var(--color-blue);
+  height: 2px;
+  border-radius: 6px;
+}
+
+.tcp-address {
+  display: flex;
+  gap: 0.5em;
+}
+
+.tcp-address > * {
+  border-radius: 5px;
+  color: var(--color-text);
+  border: 1px solid var(--color-text);
+  background-color: transparent;
+  padding: 0.5em 1em;
+}
+
+.tcp-box {
+  flex-grow: 1;
+  min-width: 0;
+  font-family: Consolas, 'Courier New', Courier, monospace;
+}
+
+.tcp-box:focus {
+  outline: 2px solid var(--color-blue);
+}
+
+.tcp-copy {
+  cursor: pointer;
+  position: relative;
+}
+
+.tcp-copy.copied {
+  color: var(--color-green);
+  border-color: var(--color-green);
+}
+
+.tcp-copy:hover {
+  background-color: rgb(127 127 127 / 0.15);
+}
