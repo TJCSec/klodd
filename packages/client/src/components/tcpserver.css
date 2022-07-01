@@ -67,6 +67,8 @@
 .tcp-copy {
   cursor: pointer;
   position: relative;
+  display: flex;
+  place-items: center;
 }
 
 .tcp-copy.copied {
@@ -76,4 +78,9 @@
 
 .tcp-copy:hover {
   background-color: rgb(127 127 127 / 0.15);
+}
+
+.tcp-copy > svg {
+  height: 1em;
+  width: 1em;
 }

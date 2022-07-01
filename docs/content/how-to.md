@@ -68,7 +68,7 @@ Each of the four connection methods is explained in more detail below.
     ```
     ncat --ssl babyheapng-e20d62127bb9434b.tjc.tf 1337
     ```
-    Apart from the `--ssl` options, this syntax is quite similar to regular netcat.
+    Apart from the `--ssl` option, this syntax is quite similar to regular netcat.
 
 ??? example "Connecting with OpenSSL `s_client`"
     [`s_client`](https://www.openssl.org/docs/man1.0.2/man1/openssl-s_client.html) is a generic SSL/TLS client from the OpenSSL command line tool.
