@@ -12,11 +12,11 @@ resource "kubernetes_manifest" "klodd_fruit_store" {
       namespace = "ctf-system" # (1)
     }
     spec = {
-      name    = "fruit-store"
+      name    = "Fruit Store"
       timeout = 60000
       pods = [
         {
-          name = "Fruit Store"
+          name = "app"
           ports = [
             {
               port = 3000
@@ -45,7 +45,7 @@ resource "kubernetes_manifest" "klodd_fruit_store" {
       ]
       expose = {
         kind = "http"
-        pod  = "fruit-store"
+        pod  = "app"
         port = 3000
       }
     }
