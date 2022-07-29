@@ -1,5 +1,5 @@
 site_name: Klodd
-site_url: https://tjcsec.github.io/klodd/
+site_url: https://klodd.tjcsec.club/
 repo_url: https://github.com/TJCSec/klodd/
 edit_uri: blob/master/docs/content/
 site_description: CTF challenge per-team instance runner
