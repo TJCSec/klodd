@@ -42,7 +42,7 @@ spec:
 2. This is the name displayed on the frontend. It does not have to be related to `metadata.name` in any way.
 3. Each instance will be stopped after this many milliseconds. This challenge will run for 10 seconds.
 4. The name is used for Deployments and Services corresponding to this Pod.
-5. The ports listed here are used to create Services so that pods are accessible via DNS. If, as in this case, the challenge only contains one Pod, then this does not do anything.
+5. The ports listed here are used to create Services. Each Pod must have at least one port.
 6. This is a normal [PodSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#podspec-v1-core).
 7. This must be either `http` or `tcp`.
 8. This is the name of the Service that will be exposed, and it must match the name given in `spec.pods`.

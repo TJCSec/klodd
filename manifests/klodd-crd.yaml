@@ -50,6 +50,7 @@ spec:
                         description: >-
                           Ports is an array of ports on this pod that will be accessible from other pods.
                           This is used to create services. It must include the exposed port.
+                        minItems: 1
                         items:
                           type: object
                           properties:
@@ -76,7 +77,7 @@ spec:
                         description: >-
                           Spec is the PodSpec that will be used to create the pod.
                         x-kubernetes-preserve-unknown-fields: true
-                    required: [name, spec]
+                    required: [name, ports, spec]
                 expose:
                   type: object
                   description: >-
