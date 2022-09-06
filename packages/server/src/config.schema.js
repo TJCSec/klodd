@@ -94,6 +94,10 @@ const schema = {
       },
     },
     reapInterval: { type: 'integer' },
+    logLevel: {
+      type: 'string',
+      enum: ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent'],
+    },
   },
   required: [
     'challengeDomain',
