@@ -1,7 +1,7 @@
 import k8s from '@kubernetes/client-node'
 
 import config from '../config.js'
-import { InstanceCreationError } from '../error.js'
+import { InstanceCreationError, InstanceExistsError } from '../error.js'
 import { appsV1Api, coreV1Api, customApi, networkingV1Api } from './api.js'
 import { LABEL_INSTANCE } from './const.js'
 import { deleteNamespace, getDeployment, getNamespace } from './util.js'
@@ -95,7 +95,7 @@ export const createInstance = async (challengeId, teamId, log) => {
     })
   } catch (err) {
     if (err instanceof k8s.HttpError && err.statusCode === 409) {
-      throw new InstanceCreationError('Instance is already running', err)
+      throw new InstanceExistsError('Instance is already running', err)
     }
     throw err
   }

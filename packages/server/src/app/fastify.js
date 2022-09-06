@@ -1,6 +1,8 @@
 import Fastify from 'fastify'
 import hyperid from 'hyperid'
 
+import config from '../config.js'
+
 const production = process.env.NODE_ENV === 'production'
 
 const fastify = Fastify({

@@ -10,7 +10,8 @@ const formatters = {
   pwn: (host, port) => `remote('${host}', ${port}, ssl=True)`,
   socat: (host, port) => `socat - openssl:${host}:${port}`,
   ncat: (host, port) => `ncat --ssl ${host} ${port}`,
-  openssl: (host, port) => `openssl s_client -quiet -verify_quiet -connect ${host}:${port}`,
+  openssl: (host, port) =>
+    `openssl s_client -quiet -verify_quiet -connect ${host}:${port}`,
 }
 
 const TcpServer = ({ host, port }) => {
@@ -27,7 +28,9 @@ const TcpServer = ({ host, port }) => {
     }
     await navigator.clipboard.writeText(format())
     setCopied(true)
-    setTimeout(() => { setCopied(false) }, 1000)
+    setTimeout(() => {
+      setCopied(false)
+    }, 1000)
   }
 
   useEffect(() => {
@@ -40,7 +43,7 @@ const TcpServer = ({ host, port }) => {
         {Object.keys(formatters).map((format) => (
           <button
             key={format}
-            className={classnames({ active: tab === format})}
+            className={classnames({ active: tab === format })}
             onClick={() => setTab(format)}
           >
             {format}
@@ -48,7 +51,13 @@ const TcpServer = ({ host, port }) => {
         ))}
       </div>
       <div className="tcp-address">
-        <input className="tcp-box" value={format()} spellCheck="false" readOnly onFocus={e => e.target.select()} />
+        <input
+          className="tcp-box"
+          value={format()}
+          spellCheck="false"
+          readOnly
+          onFocus={(e) => e.target.select()}
+        />
         <button className={classnames('tcp-copy', { copied })} onClick={copy}>
           {copied ? <CheckIcon /> : <CopyIcon />}
         </button>

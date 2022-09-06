@@ -4,7 +4,7 @@ import {
   createInstance,
   deleteInstance,
 } from '../../k8s/instance.js'
-import { InstanceCreationError } from '../../error.js'
+import { InstanceCreationError, InstanceExistsError } from '../../error.js'
 
 const routes = async (fastify, _options) => {
   fastify.addHook('preHandler', async (req, res) => {
@@ -100,9 +100,15 @@ const routes = async (fastify, _options) => {
         req.log.info('instance created')
         return instance
       } catch (err) {
-        if (err instanceof InstanceCreationError) {
+        if (err instanceof InstanceExistsError) {
           req.log.debug(err)
           req.log.debug(err.cause)
+          return res.conflict(err.message)
+        }
+        if (err instanceof InstanceCreationError) {
+          // this is likely a misconfiguration, so log it
+          req.log.error(err)
+          req.log.error(err.cause)
           return res.conflict(err.message)
         }
         throw err

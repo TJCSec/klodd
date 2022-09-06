@@ -8,4 +8,6 @@ export class KloddError extends Error {
   }
 }
 
+export class InstanceExistsError extends KloddError {}
+
 export class InstanceCreationError extends KloddError {}
