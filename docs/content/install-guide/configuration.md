@@ -18,6 +18,7 @@ Klodd is configured using YAML[^1] files. Klodd will load all files with `.yaml`
 | `traefik`         | _none_         | object                   | The Traefik entrypoints to use for challenges [(details)](#traefik)                            |
 | `ingress`         | _none_         | [NetworkPolicyPeer][npp] | A source that will be allowed to access the exposed pod. [(details)](#traefik)                 |
 | `reapInterval`    | `30000`        | integer                  | The interval, in milliseconds, that the expired instance reaper will run. [(details)](#reaper) |
+| `logLevel`        | `'info'`       | string                   | The logging level. [(details)](#log-level)                                                      |
 
 [npp]: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#networkpolicypeer-v1-networking-k8s-io
 [lo]: https://nodejs.org/api/net.html#serverlistenoptions-callback
@@ -41,3 +42,14 @@ Additionally, ingress must be allowed from Traefik to the exposed pod of each in
 ### Reaper
 
 Klodd schedules termination of each instance when it is created, and restores these on startup. Normally, this is sufficient; however, Klodd also periodically runs a "reaper," which goes through all running instances and updates their scheduled termination. This ensures that no instances will remain running indefinitely. By default, the reaper runs every 30 seconds, but this interval can be configured with the `reapInterval` property.
+
+### Log Level
+
+Klodd uses [Pino](https://getpino.io/) for logging, and the log level can be configured to [any level that Pino accepts](https://getpino.io/#/docs/api?id=loggerlevel-string-gettersetter). The table is reproduced here for convenience:
+
+|            |       |       |      |      |       |       |          |
+|:-----------|-------|-------|------|------|-------|-------|---------:|
+| **Level:** | trace | debug | info | warn | error | fatal | silent   |
+| **Value:** | 10    | 20    | 30   | 40   | 50    | 60    | Infinity |
+
+By default, Klodd uses `'info'` if the environment variable `NODE_ENV=production` is present and `'debug'` otherwise.
