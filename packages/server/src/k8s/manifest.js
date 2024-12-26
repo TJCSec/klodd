@@ -160,7 +160,7 @@ export const makeServiceFactory =
 export const makeIngressRouteFactory =
   (kind) =>
   ({ host, serviceName, servicePort, numMiddlewares }) => ({
-    apiVersion: 'traefik.containo.us/v1alpha1',
+    apiVersion: 'traefik.io/v1alpha1',
     kind: kind === 'http' ? 'IngressRoute' : 'IngressRouteTCP',
     metadata: { name: 'ingress' },
     spec: {
@@ -190,7 +190,7 @@ export const makeIngressRouteFactory =
   })
 
 export const makeMiddlewareFactory = (kind) => (middleware, idx) => ({
-  apiVersion: 'traefik.containo.us/v1alpha1',
+  apiVersion: 'traefik.io/v1alpha1',
   kind: kind === 'http' ? 'Middleware' : 'MiddlewareTCP',
   metadata: { name: `middleware-${idx}` },
   spec: middleware,
