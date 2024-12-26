@@ -163,7 +163,7 @@ export const createInstance = async (challengeId, teamId, log) => {
         challengeConfig.middlewares.map(makeMiddleware).map((middleware) =>
           customApi
             .createNamespacedCustomObject(
-              'traefik.containo.us',
+              'traefik.io',
               'v1alpha1',
               namespace,
               middlewarePlural,
@@ -194,7 +194,7 @@ export const createInstance = async (challengeId, teamId, log) => {
     })
     await customApi
       .createNamespacedCustomObject(
-        'traefik.containo.us',
+        'traefik.io',
         'v1alpha1',
         namespace,
         ingressPlural,
