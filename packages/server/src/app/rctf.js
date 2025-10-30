@@ -13,7 +13,7 @@ const getTeam = async (token) => {
     resolveBodyOnly: true,
     throwHttpErrors: false,
   })
-  if (kind !== 'goodUserSelfData') {
+  if (kind !== 'goodUserData' && kind !== 'goodUserSelfData') { // goodUserData used in redpwn/rctf, goodUserSelfData used in otter-sec/rctf
     return null
   }
   return data
