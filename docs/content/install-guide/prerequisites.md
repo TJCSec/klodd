@@ -10,7 +10,7 @@ There are a number of prerequisites that you must set up before using Klodd.
 
 ## rCTF
 
-Klodd integrates with [rCTF](https://rctf.redpwn.net/), redpwn's CTF platform. Because [rCTF does not currently support OAuth](https://img.shields.io/badge/PRs-welcome-brightgreen), you must patch in "pseudo-OAuth" functionality. Consider using the following Cloudflare worker on your rCTF domain `/auth*`, replacing `[KLODD_URL]` with Klodd's public URL.
+Klodd integrates with [rCTF](https://rctf.osec.io/), redpwn's CTF platform. Because [rCTF does not currently support OAuth](https://img.shields.io/badge/PRs-welcome-brightgreen), you must patch in "pseudo-OAuth" functionality. Consider using the following Cloudflare worker on your rCTF domain `/auth*`, replacing `[KLODD_URL]` with Klodd's public URL.
 
 ```js
 const renderAuthPage = uri => `<!doctype html>
