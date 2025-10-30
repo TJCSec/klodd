@@ -1,4 +1,4 @@
-FROM node:16.15.1-bullseye AS build
+FROM node:18-bullseye AS build
 
 WORKDIR /app
 COPY package.json lerna.json ./
@@ -11,7 +11,7 @@ RUN yarn bootstrap --ci
 COPY packages/client packages/client
 RUN yarn build
 
-FROM node:16.15.1-bullseye-slim AS run
+FROM node:18-bullseye-slim AS run
 
 WORKDIR /app
 ENV NODE_ENV=production

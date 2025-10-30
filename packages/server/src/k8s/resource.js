@@ -66,7 +66,9 @@ const subscribeToCluster = async () => {
       stopAll(apiObj.metadata.name)
     },
     (err) => {
-      if (err) {
+      // Slightly hacky, but k8s aborts the connection after 5 minutes for some reason. Because of that,
+      // we should just reconnect as otherwise the entire container gets restarted causing downtime.
+      if (err && err.code !== 'ECONNRESET') {
         throw err
       }
       subscribeToCluster() // TODO: is this proper usage?

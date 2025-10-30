@@ -13,7 +13,7 @@ const getTeam = async (token) => {
     resolveBodyOnly: true,
     throwHttpErrors: false,
   })
-  if (kind !== 'goodUserData') {
+  if (kind !== 'goodUserSelfData') {
     return null
   }
   return data
